@@ -24,7 +24,6 @@ class TreeFile {
 
     private:
         ifstream tree;
-        bool isEmpty;
 };
 
 #endif
