@@ -81,7 +81,7 @@ TreeFile::node TreeFile::getNextNode() {
     node p;
     tree.read((char *)(&p), sizeof(node));
 
-    if(! tree.eof()) {
+    if(! tree.eof()) { // tratamento de erro no qual tenta-se ler um no depois doo final do arquivo
         return p;
     } else {
         tree.seekg(0);
@@ -95,7 +95,7 @@ TreeFile::node TreeFile::getNthNode(int n) {
     node p;
     tree.read((char *)(&p), sizeof(node));
 
-    if(! tree.eof()) {
+    if(! tree.eof()) { // tratamento de erro no qual tenta-se ler um no depois doo final do arquivo
         return p;
     } else {
         tree.seekg(0);
