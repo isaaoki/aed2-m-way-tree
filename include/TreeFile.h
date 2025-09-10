@@ -19,11 +19,11 @@ class TreeFile {
         node getTreeRoot();
         node getNextNode();
         node getNthNode(int n);
-        bool writeNode(node newNode);
-        bool removeNode(int n);
+        void writeNode(TreeFile::node newNode);
+        void removeNode(int n);
 
     private:
-        ifstream tree;
+        fstream tree;
 };
 
 #endif

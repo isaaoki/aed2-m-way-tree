@@ -8,7 +8,7 @@ using namespace std;
 #include "../include/TreeFile.h"
 
 TreeFile::TreeFile(){
-    tree.open("../files/TreeFile.bin", ios::in | ios::out);
+    tree.open("../files/TreeFile.bin", ios::in | ios::out | ios::binary);
 
     if(! tree) {
 
@@ -17,7 +17,7 @@ TreeFile::TreeFile(){
         node p;
         int r = 1; // Indice onde se localiza a raiz da arvore de m-vias
 
-        ofstream arvore ("../files/TreeFile.bin",ios::out);
+        ofstream arvore ("../files/TreeFile.bin",ios::out | ios::binary);
         if(! arvore){
             cerr << "Arquivo TreeFile.bin nao pode ser aberto." << endl;
             abort();
@@ -43,7 +43,7 @@ TreeFile::TreeFile(){
         arvore.close();
         txtFile.close();
 
-        ifstream arvoreIn ("../files/TreeFile.bin",ios::in);
+        ifstream arvoreIn ("../files/TreeFile.bin", ios::in | ios::binary);
         if(! arvoreIn){
             cerr << "Arquivo TreeFile.bin nao pode ser aberto." << endl;
             abort();
@@ -60,10 +60,13 @@ TreeFile::TreeFile(){
             cout << endl;
             arvoreIn.read((char *)(&p),sizeof(node));
         }
+        tree.close();
         abort();
         // fim da criacao do arquivo de acordo com mvias.txt, caso o arquivo binario nao exista
 
     }
+    tree.seekg(3 * sizeof(node));
+    //tree.seekp(1 * sizeof(node));
 }
 
 TreeFile::~TreeFile(){
@@ -91,15 +94,19 @@ TreeFile::node TreeFile::getNextNode() {
 }
 
 TreeFile::node TreeFile::getNthNode(int n) {
-    tree.seekg(n * sizeof(node));
+    tree.seekg(n * sizeof(node)) ;
     node p;
     tree.read((char *)(&p), sizeof(node));
 
     if(! tree.eof()) { // tratamento de erro no qual tenta-se ler um no depois do final do arquivo
         return p;
     } else {
-        tree.seekg(0);
-        tree.read((char *)(&p), sizeof(node));
-        return p;
+        cout << "Erro: tentativa de acessar no inexistente."<< endl;
+        abort();
     }
+}
+
+void TreeFile::writeNode(node newNode) {
+    tree.seekp(6 * sizeof(node));
+    tree.write((const char *)(&newNode), sizeof(node));
 }
