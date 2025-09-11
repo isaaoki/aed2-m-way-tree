@@ -40,6 +40,11 @@ TreeFile::TreeFile(){
             arvore.write((const char *)(&p),sizeof(node));
             txtFile >> p.n;
         }
+
+        p.n = 5;
+        p.A[0] = 1; // Definicao da raiz
+        arvore.seekp(0);
+        arvore.write((const char *)(&p),sizeof(node));
         arvore.close();
         txtFile.close();
 
@@ -60,22 +65,27 @@ TreeFile::TreeFile(){
             cout << endl;
             arvoreIn.read((char *)(&p),sizeof(node));
         }
-        tree.close();
+
         abort();
         // fim da criacao do arquivo de acordo com mvias.txt, caso o arquivo binario nao exista
 
     }
-    tree.seekg(3 * sizeof(node));
-    //tree.seekp(1 * sizeof(node));
+    node p;
+    tree.seekg(0);
+    tree.read((char *)(&p), sizeof(node));
+    size = p.n;
+    root = p.A[0];
+    tree.seekg(1 * sizeof(node));
 }
 
 TreeFile::~TreeFile(){
+    writeMetaInfo();
     tree.close();
 }
 
 TreeFile::node TreeFile::getTreeRoot() {
     node p;
-    tree.seekg(1 * sizeof(node));
+    tree.seekg(root * sizeof(node));
     tree.read((char *)(&p), sizeof(node));
     return p;
 }
@@ -107,6 +117,14 @@ TreeFile::node TreeFile::getNthNode(int n) {
 }
 
 void TreeFile::writeNode(node newNode) {
-    tree.seekp(6 * sizeof(node));
+    tree.seekp(++size * sizeof(node));
     tree.write((const char *)(&newNode), sizeof(node));
+}
+
+void TreeFile::writeMetaInfo() {
+    node p;
+    p.n = size;
+    p.A[0] = root;
+    tree.seekp(0);
+    tree.write((const char *)(&p),sizeof(node));
 }

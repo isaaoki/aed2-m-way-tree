@@ -8,7 +8,7 @@ int main() {
     TreeFile t;
     TreeFile::node node;
 
-    //t.writeNode(t.getNthNode(1));
+    t.writeNode(t.getTreeRoot());
     // teste da funcao getNthNode
     for(int j = 1; j < 7; j++) {
         node = t.getNthNode(j);
