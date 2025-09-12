@@ -1,6 +1,6 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
-#include <cstdlib>
 #include <vector>
 #include <limits.h>
 using namespace std;
@@ -8,21 +8,31 @@ using namespace std;
 #include "../include/TreeFile.h"
 
 void printNode(TreeFile::node node) {
-    cout << node.n << " " << node.A[0] << " ";
+    cout << node.n << ","
+         << right << setw(3) << node.A[0] << ",";
     for (int j = 1; j <= node.n; j++) {
-        cout << node.K[j] << " " << node.A[j] << " ";
+        cout << "(" 
+             << setw(3) << node.K[j] << ", "
+             << setw(3) << node.A[j] << ")";
     }
     cout << endl;
 }
 
 void printTree(TreeFile &t) {
-    cout << "------------------------------------------------------------------" << endl;
-    cout << "No n, A[0], (K[1], A[1]), ..., (K[n], A[n])" << endl;
+    int indexRoot = t.getIndexRoot();
+    int m = 3; // TODO: método na TreeFile para pegar m
+
+    cout << "T = " << indexRoot << ", m = " << m << endl;
+    cout << string(66, '-') << endl;
+    cout << left << setw(6) << "No" 
+         << "n,A[0],(K[1],A[1]),...,(K[n],A[n])" << endl;
+    cout << string(66, '-') << endl;
     
     int size = t.getSize();
     TreeFile::node node;
 
     for (int i = 1; i <= size; i++) {
+        cout << left << setw(6) << i;
         node = t.getNthNode(i);
         printNode(node);
     }
@@ -81,23 +91,26 @@ void mSearch(TreeFile &t, int x, int &nodeNumber, int &i, bool &success) {
 
 int main() {
     TreeFile t;
-    // TODO: Se o arquivo mvias.bin não existir sair do programa, ou tentar abrir de novo...
-    
-    int nodeNumber;
-    int i = -1;
+    int i, key, indexNode; 
     bool success = false;
-    int x = 34; 
+    string isRunning;
 
-    printTree(t);
-    cout << "Chave de busca: " << x << endl;
-    mSearch(t, x, nodeNumber, i, success);
-    cout << x << " (" << nodeNumber << "," << i << ",";
-    if (success) {
-        cout << "true)" << endl;
-    } else {
-        cout << "false)" << endl;
-    }
+    // TODO: Se o arquivo mvias.bin não existir sair do programa, ou tentar abrir de novo...
+
+    do {
+        printTree(t);
+        cout << "Chave de busca: ";
+        cin >> key;
+
+        mSearch(t, key, indexNode, i, success);
+
+        cout << setw(4) << key << " ("
+             << indexNode << "," << i << ",";
+        cout << (success ? "true" : "false") << ")" << endl;
+
+        cout << "Continuar busca (s/n)? ";
+        cin >> isRunning;
+    } while (isRunning != "n");
 
     return 0; // fecha o arquivo e salva-o no disco
 }
-
