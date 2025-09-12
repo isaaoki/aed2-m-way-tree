@@ -10,7 +10,7 @@ using namespace std;
 TreeFile::TreeFile(){
     tree.open("../files/TreeFile.bin", ios::in | ios::out | ios::binary);
 
-    if(! tree) {
+    if(!tree.is_open()) {
 
         // Criacao do arquivo de acordo com mvias.txt, caso o arquivo binario nao exista
         cout << "Arquivo TreeFile.bin nao existe ainda, criando..." << endl;
@@ -18,15 +18,15 @@ TreeFile::TreeFile(){
         int r = 1; // Indice onde se localiza a raiz da arvore de m-vias
 
         ofstream arvore ("../files/TreeFile.bin",ios::out | ios::binary);
-        if(! arvore){
-            cerr << "Arquivo TreeFile.bin nao pode ser aberto." << endl;
+        if(!arvore.is_open()){
+            cerr << "Erro: arquivo TreeFile.bin nao pode ser aberto." << endl;
             abort();
         }
 
         ifstream txtFile;
         txtFile.open("../mvias.txt", ios::in);
-        if (! txtFile){
-            cout << "Arquivo mvias.txt nao pode ser aberto" << endl;
+        if (!txtFile.is_open()){
+            cerr << "Erro: arquivo mvias.txt nao pode ser aberto" << endl;
             abort();
         }
 
@@ -41,6 +41,7 @@ TreeFile::TreeFile(){
             txtFile >> p.n;
         }
 
+        // Dados da raiz na posicao 0 do arquivo binario
         p.n = 5;
         p.A[0] = 1; // Definicao da raiz
         arvore.seekp(0);
@@ -48,25 +49,25 @@ TreeFile::TreeFile(){
         arvore.close();
         txtFile.close();
 
-        ifstream arvoreIn ("../files/TreeFile.bin", ios::in | ios::binary);
-        if(! arvoreIn){
-            cerr << "Arquivo TreeFile.bin nao pode ser aberto." << endl;
-            abort();
-        }
+        cout << "Arquivo criado! Inicie o programa novamente!" << endl;
 
-        arvoreIn.seekg(r * sizeof(node));
-        arvoreIn.read((char *)(&p),sizeof(node));
+        // ifstream arvoreIn ("../files/TreeFile.bin", ios::in | ios::binary);
+        // if(! arvoreIn){
+        //     cerr << "Arquivo TreeFile.bin nao pode ser aberto." << endl;
+        //     abort();
+        // }
 
-        while(! arvoreIn.eof()) {
-            cout << p.n << " " << p.A[0] << " ";
-            for(int i = 1; i <= p.n; i++) {
-                cout << p.K[i] << " " << p.A[i] << " ";
-            }
-            cout << endl;
-            arvoreIn.read((char *)(&p),sizeof(node));
-        }
+        // arvoreIn.seekg(r * sizeof(node));
+        // arvoreIn.read((char *)(&p),sizeof(node));
 
-        abort();
+        // while(! arvoreIn.eof()) {
+        //     cout << p.n << " " << p.A[0] << " ";
+        //     for(int i = 1; i <= p.n; i++) {
+        //         cout << p.K[i] << " " << p.A[i] << " ";
+        //     }
+        //     cout << endl;
+        //     arvoreIn.read((char *)(&p),sizeof(node));
+        // }
         // fim da criacao do arquivo de acordo com mvias.txt, caso o arquivo binario nao exista
 
     }
@@ -79,7 +80,7 @@ TreeFile::TreeFile(){
 }
 
 TreeFile::~TreeFile(){
-    writeMetaInfo();
+    // writeMetaInfo();
     tree.close();
 }
 
@@ -127,4 +128,12 @@ void TreeFile::writeMetaInfo() {
     p.A[0] = root;
     tree.seekp(0);
     tree.write((const char *)(&p),sizeof(node));
+}
+
+int TreeFile::getSize() {
+    return size;
+}
+
+int TreeFile::getIndexRoot() {
+    return root;
 }

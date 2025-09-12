@@ -21,6 +21,8 @@ class TreeFile {
         node getNthNode(int n);
         void writeNode(TreeFile::node newNode);
         void removeNode(int n);
+        int getSize();
+        int getIndexRoot();
 
     private:
         fstream tree;
