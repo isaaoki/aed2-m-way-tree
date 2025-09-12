@@ -20,7 +20,7 @@ void printNode(TreeFile::node node) {
 
 void printTree(TreeFile &t) {
     int indexRoot = t.getIndexRoot();
-    int m = 3; // TODO: método na TreeFile para pegar m
+    int m = t.m;
 
     cout << "T = " << indexRoot << ", m = " << m << endl;
     cout << string(66, '-') << endl;
@@ -40,12 +40,18 @@ void printTree(TreeFile &t) {
     cout << "------------------------------------------------------------------" << endl;
 }
 
+int linearSearch(vector<int> &K, int x, int n) {
+    int i = 0;
+    while (i <= n && K[i] < x) {
+        i++;
+    } 
+    return i;
+}
+
 void mSearch(TreeFile &t, int x, int &nodeNumber, int &i, bool &success) {
     TreeFile::node node;
-
     int p = t.getIndexRoot(); 
-    int q;
-    int index, childIndex;
+    int q = 0;
     success = false; 
 
     // Mudar isso para indice talves (p != 0)
@@ -60,38 +66,28 @@ void mSearch(TreeFile &t, int x, int &nodeNumber, int &i, bool &success) {
         K[node.n + 1] = INT_MAX;
 
         // Busca do indice Ki
-        index = 0;
-        while (index <= node.n && K[index] < x) {
-            index++;
-        } 
+        i = linearSearch(K, x, node.n);
 
-        if (x == K[index]) {
+        if (x == K[i]) {
             nodeNumber = p;
-            i = index;
             success = true;
             return;
-        } else {
-
-            // TODO: Arrumar a descida para o filho correto
-            childIndex = index - 1;
-            if (childIndex < 0) childIndex = 0;
-            if (childIndex > node.n) childIndex = node.n;
-            
+        } else {            
+            i--;
             q = p;
-            p = node.A[childIndex];
+            p = node.A[i]; // desce para subarvore correta
         }
 
     }
 
     nodeNumber = q;
-    i = childIndex;
     success = false;
 
 }
 
 int main() {
     TreeFile t;
-    int i, key, indexNode; 
+    int i, x, nodeNumber; 
     bool success = false;
     string isRunning;
 
@@ -100,12 +96,12 @@ int main() {
     do {
         printTree(t);
         cout << "Chave de busca: ";
-        cin >> key;
+        cin >> x;
 
-        mSearch(t, key, indexNode, i, success);
+        mSearch(t, x, nodeNumber, i, success);
 
-        cout << setw(4) << key << " ("
-             << indexNode << "," << i << ",";
+        cout << setw(4) << x << " ("
+             << nodeNumber << "," << i << ",";
         cout << (success ? "true" : "false") << ")" << endl;
 
         cout << "Continuar busca (s/n)? ";
