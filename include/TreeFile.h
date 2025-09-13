@@ -21,6 +21,8 @@ class TreeFile {
         node getNthNode(int n);
         void writeNode(TreeFile::node newNode);
         void removeNode(int n);
+        static void printNode(node node);
+        void printTree();
         int getSize();
         int getIndexRoot();
 
