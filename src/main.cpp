@@ -5,40 +5,7 @@
 #include <limits.h>
 using namespace std;
 
-#include "TreeFile.cpp"
-
-void printNode(TreeFile::node node) {
-    cout << node.n << ","
-         << right << setw(3) << node.A[0] << ",";
-    for (int j = 1; j <= node.n; j++) {
-        cout << "(" 
-             << setw(3) << node.K[j] << ", "
-             << setw(3) << node.A[j] << ")";
-    }
-    cout << endl;
-}
-
-void printTree(TreeFile &t) {
-    int indexRoot = t.getIndexRoot();
-    int m = t.m;
-
-    cout << "T = " << indexRoot << ", m = " << m << endl;
-    cout << string(66, '-') << endl;
-    cout << left << setw(6) << "No" 
-         << "n,A[0],(K[1],A[1]),...,(K[n],A[n])" << endl;
-    cout << string(66, '-') << endl;
-    
-    int size = t.getSize();
-    TreeFile::node node;
-
-    for (int i = 1; i <= size; i++) {
-        cout << left << setw(6) << i;
-        node = t.getNthNode(i);
-        printNode(node);
-    }
-
-    cout << "------------------------------------------------------------------" << endl;
-}
+#include "../include/TreeFile.h"
 
 int linearSearch(vector<int> &K, int x, int n) {
     int i = 0;
@@ -94,7 +61,7 @@ int main() {
     // TODO: Se o arquivo mvias.bin não existir sair do programa, ou tentar abrir de novo...
 
     do {
-        printTree(t);
+        t.printTree();
         cout << "Chave de busca: ";
         cin >> x;
 

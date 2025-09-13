@@ -41,7 +41,7 @@ TreeFile::node TreeFile::getNextNode() {
 }
 
 TreeFile::node TreeFile::getNthNode(int n) {
-    tree.seekg(n * sizeof(node)) ;
+    tree.seekg(n * sizeof(node));
     node p;
     tree.read((char *)(&p), sizeof(node));
 
@@ -58,6 +58,34 @@ void TreeFile::writeNode(node newNode) {
     tree.write((const char *)(&newNode), sizeof(node));
 }
 
+void TreeFile::printNode(node node) {
+    cout << node.n << ","
+         << right << setw(3) << node.A[0] << ",";
+    for (int j = 1; j <= node.n; j++) {
+        cout << "(" 
+             << setw(3) << node.K[j] << ", "
+             << setw(3) << node.A[j] << ")";
+    }
+    cout << endl;
+}
+
+void TreeFile::printTree() {
+    cout << "T = " << root << ", m = " << m << endl;
+    cout << string(66, '-') << endl;
+    cout << left << setw(6) << "No" 
+         << "n,A[0],(K[1],A[1]),...,(K[n],A[n])" << endl;
+    cout << string(66, '-') << endl;
+
+    tree.seekg(1 * sizeof(node));
+    for (int i = 1; i <= size; i++) {
+        cout << left << setw(6) << i;
+        printNode(getNextNode());
+    }
+    tree.seekg(1 * sizeof(node));
+
+    cout << "------------------------------------------------------------------" << endl;
+}
+
 void TreeFile::writeMetaInfo() {
     node p;
     p.n = size;
@@ -70,29 +98,27 @@ void TreeFile::createTree() {
 
     string fileName;
     cout << "Arquivo TreeFile.bin nao existe ainda, criando..." << endl;
-    cout << "Entre com o nome do arquivo de texto a ser lido (default: mvias.txt): " << endl;
+    cout << "Entre com o nome do arquivo de texto a ser lido (default: mvias.txt): ";
     cin >> fileName;
 
     ifstream txtFile;
-    txtFile.open("../" + fileName, ios::in);
+    txtFile.open(string("../" + fileName), ios::in);
     if (!txtFile.is_open()){
-        txtFile.open("../" + fileName + ".txt", ios::in);
+        txtFile.open(string("../" + fileName + ".txt"), ios::in);
         if (!txtFile.is_open()){
             txtFile.open("../mvias.txt", ios::in);
             if (!txtFile.is_open()){
-                cerr << "Erro: arquivo de texto nao pode ser aberto (provavel erro de armazenamento)." << endl;
+                cout << "Erro: arquivo de texto nao pode ser aberto (provavel erro de armazenamento)." << endl;
                 abort();
             } else {
                 cout << "Nome fornecido invalido ou arquivo não encontrado, lendo mvias.txt..." << endl;
             }
         } else {
-            cout << "Lendo o arquivo" << fileName << ".txt..." << endl;
+            cout << "Lendo " << fileName << ".txt..." << endl;
         }
     } else {
-        cout << "Lendo o arquivo" << fileName << "..." << endl;
+        cout << "Lendo " << fileName << "..." << endl;
     }
-
-    txtFile >> root;
 
     ofstream treeCreation("../files/TreeFile.bin", ios::out | ios::binary);
     if(!treeCreation.is_open()){
@@ -104,6 +130,7 @@ void TreeFile::createTree() {
     size = 0;
     treeCreation.seekp(1 * sizeof(node));
 
+    txtFile >> root;
     txtFile >> p.n;
     while(! txtFile.eof()) {
         txtFile >> p.A[0];
@@ -123,6 +150,8 @@ void TreeFile::createTree() {
     treeCreation.close();
 
     tree.open("../files/TreeFile.bin", ios::in | ios::out | ios::binary);
+
+    cout << "Arquivo binario criado com sucesso! Continuando o programa..." << endl << endl;
 }
 
 int TreeFile::getSize() {
