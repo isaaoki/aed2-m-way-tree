@@ -11,72 +11,8 @@ TreeFile::TreeFile(){
     tree.open("../files/TreeFile.bin", ios::in | ios::out | ios::binary);
 
     if(!tree.is_open()) {
-
-        // Criacao do arquivo de acordo com mvias.txt, caso o arquivo binario nao exista
-        cout << "Arquivo TreeFile.bin nao existe ainda, criando..." << endl;
-        node p;
-        int r = 1; // Indice onde se localiza a raiz da arvore de m-vias
-
-        ofstream arvore ("../files/TreeFile.bin",ios::out | ios::binary);
-        if(!arvore.is_open()){
-            cerr << "Erro: arquivo TreeFile.bin nao pode ser aberto." << endl;
-            abort();
-        }
-
-        ifstream txtFile;
-        txtFile.open("../mvias.txt", ios::in);
-        if (!txtFile.is_open()){
-            cerr << "Erro: arquivo mvias.txt nao pode ser aberto" << endl;
-            abort();
-        }
-
-        arvore.seekp(r * sizeof(node));
-        txtFile >> p.n;
-        while(! txtFile.eof()) {
-            txtFile >> p.A[0];
-            for(int i = 1; i <= p.n; i++) {
-                txtFile >> p.K[i] >> p.A[i];
-            }
-            arvore.write((const char *)(&p),sizeof(node));
-            txtFile >> p.n;
-        }
-
-        // Dados da raiz na posicao 0 do arquivo binario
-        p.n = 5;
-        p.A[0] = 1; // Definicao da raiz
-        arvore.seekp(0);
-        arvore.write((const char *)(&p),sizeof(node));
-        arvore.close();
-        txtFile.close();
-
-        cout << "Arquivo criado! Inicie o programa novamente!" << endl;
-
-        // ifstream arvoreIn ("../files/TreeFile.bin", ios::in | ios::binary);
-        // if(! arvoreIn){
-        //     cerr << "Arquivo TreeFile.bin nao pode ser aberto." << endl;
-        //     abort();
-        // }
-
-        // arvoreIn.seekg(r * sizeof(node));
-        // arvoreIn.read((char *)(&p),sizeof(node));
-
-        // while(! arvoreIn.eof()) {
-        //     cout << p.n << " " << p.A[0] << " ";
-        //     for(int i = 1; i <= p.n; i++) {
-        //         cout << p.K[i] << " " << p.A[i] << " ";
-        //     }
-        //     cout << endl;
-        //     arvoreIn.read((char *)(&p),sizeof(node));
-        // }
-        // fim da criacao do arquivo de acordo com mvias.txt, caso o arquivo binario nao exista
-
+        createTree();
     }
-    node p;
-    tree.seekg(0);
-    tree.read((char *)(&p), sizeof(node));
-    size = p.n;
-    root = p.A[0];
-    tree.seekg(1 * sizeof(node));
 }
 
 TreeFile::~TreeFile(){
@@ -128,6 +64,65 @@ void TreeFile::writeMetaInfo() {
     p.A[0] = root;
     tree.seekp(0);
     tree.write((const char *)(&p),sizeof(node));
+}
+
+void TreeFile::createTree() {
+
+    string fileName;
+    cout << "Arquivo TreeFile.bin nao existe ainda, criando..." << endl;
+    cout << "Entre com o nome do arquivo de texto a ser lido (default: mvias.txt): " << endl;
+    cin >> fileName;
+
+    ifstream txtFile;
+    txtFile.open("../" + fileName, ios::in);
+    if (!txtFile.is_open()){
+        txtFile.open("../" + fileName + ".txt", ios::in);
+        if (!txtFile.is_open()){
+            txtFile.open("../mvias.txt", ios::in);
+            if (!txtFile.is_open()){
+                cerr << "Erro: arquivo de texto nao pode ser aberto (provavel erro de armazenamento)." << endl;
+                abort();
+            } else {
+                cout << "Nome fornecido invalido ou arquivo não encontrado, lendo mvias.txt..." << endl;
+            }
+        } else {
+            cout << "Lendo o arquivo" << fileName << ".txt..." << endl;
+        }
+    } else {
+        cout << "Lendo o arquivo" << fileName << "..." << endl;
+    }
+
+    txtFile >> root;
+
+    ofstream treeCreation("../files/TreeFile.bin", ios::out | ios::binary);
+    if(!treeCreation.is_open()){
+        cerr << "Erro: arquivo TreeFile.bin nao pode ser aberto (provavel erro de armazenamento)." << endl;
+        abort();
+    }
+
+    node p;
+    size = 0;
+    treeCreation.seekp(1 * sizeof(node));
+
+    txtFile >> p.n;
+    while(! txtFile.eof()) {
+        txtFile >> p.A[0];
+        for(int i = 1; i <= p.n; i++) {
+            txtFile >> p.K[i] >> p.A[i];
+        }
+        treeCreation.write((const char *)(&p),sizeof(node));
+        size++;
+        txtFile >> p.n;
+    }
+    txtFile.close();
+
+    p.n = size;
+    p.A[0] = root;
+    treeCreation.seekp(0);
+    treeCreation.write((const char *)(&p),sizeof(node));
+    treeCreation.close();
+
+    tree.open("../files/TreeFile.bin", ios::in | ios::out | ios::binary);
 }
 
 int TreeFile::getSize() {

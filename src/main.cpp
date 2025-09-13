@@ -5,7 +5,7 @@
 #include <limits.h>
 using namespace std;
 
-#include "../include/TreeFile.h"
+#include "TreeFile.cpp"
 
 void printNode(TreeFile::node node) {
     cout << node.n << ","

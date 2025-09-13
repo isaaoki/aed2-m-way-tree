@@ -29,6 +29,7 @@ class TreeFile {
         int size;
         int root;
         void writeMetaInfo();
+        void createTree();
 };
 
 #endif
