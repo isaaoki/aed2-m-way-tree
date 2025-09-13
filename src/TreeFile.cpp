@@ -43,6 +43,7 @@ TreeFile::TreeFile(){
 
         p.n = 5;
         p.A[0] = 1; // Definicao da raiz
+        p.A[1] = 6; // Definicao do proximo no livre
         arvore.seekp(0);
         arvore.write((const char *)(&p),sizeof(node));
         arvore.close();
@@ -75,6 +76,7 @@ TreeFile::TreeFile(){
     tree.read((char *)(&p), sizeof(node));
     size = p.n;
     root = p.A[0];
+    nextFreeNode = p.A[1];
     tree.seekg(1 * sizeof(node));
 }
 
@@ -121,10 +123,19 @@ void TreeFile::writeNode(node newNode) {
     tree.write((const char *)(&newNode), sizeof(node));
 }
 
+void TreeFile::removeNode(int n) {
+    node p;
+    p.n = 0;
+    p.A[1] = nextFreeNode;
+    tree.write((const char *)(&p), sizeof(node));
+    nextFreeNode = n;
+}
+
 void TreeFile::writeMetaInfo() {
     node p;
     p.n = size;
     p.A[0] = root;
+    p.A[1] = nextFreeNode;
     tree.seekp(0);
     tree.write((const char *)(&p),sizeof(node));
 }

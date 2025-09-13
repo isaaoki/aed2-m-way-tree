@@ -26,6 +26,7 @@ class TreeFile {
         fstream tree;
         int size;
         int root;
+        int nextFreeNode;
         void writeMetaInfo();
 };
 
