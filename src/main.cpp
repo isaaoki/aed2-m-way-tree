@@ -59,8 +59,6 @@ int main() {
     bool success = false;
     string isRunning;
 
-    // TODO: Se o arquivo mvias.bin não existir sair do programa, ou tentar abrir de novo...
-
     do {
         t.printTree();
         cout << "Chave de busca: ";
