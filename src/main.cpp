@@ -5,9 +5,7 @@
 #include <limits.h>
 using namespace std;
 
-#include "TreeFile.cpp"
 #include "../include/TreeFile.h"
-#include "Index.cpp"
 #include "../include/Index.h"
 
 int main() {
