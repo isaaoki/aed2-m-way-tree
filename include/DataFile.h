@@ -7,8 +7,9 @@
 class DataFile {
     public:
         struct registro{
-    };
+
+        };
     private:
-}
+};
 
 #endif

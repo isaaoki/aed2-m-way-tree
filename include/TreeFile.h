@@ -19,8 +19,6 @@ class TreeFile {
         node getTreeRoot();
         node getNextNode();
         node getNthNode(int n);
-        void writeNode(TreeFile::node newNode);
-        void removeNode(int n);
         static void printNode(node node);
         void printTree();
         int getSize();
@@ -30,7 +28,6 @@ class TreeFile {
         fstream tree;
         int size;
         int root;
-        void writeMetaInfo();
         void createTree();
 };
 
