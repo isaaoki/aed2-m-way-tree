@@ -26,8 +26,8 @@ class TreeFile {
 
     private:
         fstream tree;
-        int size;
-        int root;
+        int size; // total de nos
+        int root; 
         void createTree();
 };
 

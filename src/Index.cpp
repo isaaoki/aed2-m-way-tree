@@ -36,7 +36,6 @@ Index::mSearchResut Index::mSearch(TreeFile* treeFile, int x) {
     int q = 0;
     result.found = false; 
 
-    // Mudar isso para indice talves (p != 0)
     while (p != 0) {
         // Ler nó
         node = treeFile->getNthNode(p);
@@ -57,15 +56,11 @@ Index::mSearchResut Index::mSearch(TreeFile* treeFile, int x) {
         } else {            
             result.i--;
             q = p;
-            p = node.A[result.i]; // desce para subarvore correta
+            p = node.A[result.i]; // Desce para subarvore correta
         }
 
     }
 
     result.pos = q;
-    result.found = false;
     return result;
 }
-
-
-
