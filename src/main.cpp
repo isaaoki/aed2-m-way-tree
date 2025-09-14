@@ -5,6 +5,7 @@
 #include <limits.h>
 using namespace std;
 
+#include "TreeFile.cpp"
 #include "../include/TreeFile.h"
 
 int linearSearch(vector<int> &K, int x, int n) {
