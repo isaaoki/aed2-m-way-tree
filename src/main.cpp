@@ -7,56 +7,14 @@ using namespace std;
 
 #include "TreeFile.cpp"
 #include "../include/TreeFile.h"
-
-int linearSearch(vector<int> &K, int x, int n) {
-    int i = 0;
-    while (i <= n && K[i] < x) {
-        i++;
-    } 
-    return i;
-}
-
-void mSearch(TreeFile &t, int x, int &nodeNumber, int &i, bool &success) {
-    TreeFile::node node;
-    int p = t.getIndexRoot(); 
-    int q = 0;
-    success = false; 
-
-    // Mudar isso para indice talves (p != 0)
-    while (p != 0) {
-        // Ler nó
-        node = t.getNthNode(p);
-
-        // Ajuste do array para incluir MIN_VALUE e MAX_VALUE
-        vector<int> K(node.n + 2); 
-        K[0] = INT_MIN;
-        for (int j = 1; j <= node.n; j++) K[j] = node.K[j];
-        K[node.n + 1] = INT_MAX;
-
-        // Busca do indice Ki
-        i = linearSearch(K, x, node.n);
-
-        if (x == K[i]) {
-            nodeNumber = p;
-            success = true;
-            return;
-        } else {            
-            i--;
-            q = p;
-            p = node.A[i]; // desce para subarvore correta
-        }
-
-    }
-
-    nodeNumber = q;
-    success = false;
-
-}
+#include "Index.cpp"
+#include "../include/Index.h"
 
 int main() {
     TreeFile t;
-    int i, x, nodeNumber; 
-    bool success = false;
+    Index index(&t);
+    Index::mSearchResut searchResult;
+    int x;
     string isRunning;
 
     do {
@@ -64,11 +22,11 @@ int main() {
         cout << "Chave de busca: ";
         cin >> x;
 
-        mSearch(t, x, nodeNumber, i, success);
+        searchResult = index.mSearch(x);
 
         cout << setw(4) << x << " ("
-             << nodeNumber << "," << i << ",";
-        cout << (success ? "true" : "false") << ")" << endl;
+             << searchResult.pos << "," << searchResult.i << ",";
+        cout << (searchResult.found ? "true" : "false") << ")" << endl;
 
         cout << "Continuar busca (s/n)? ";
         cin >> isRunning;
