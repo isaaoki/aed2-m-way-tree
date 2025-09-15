@@ -9,19 +9,33 @@ using namespace std;
 
 #include "../include/Index.h"
 
+// ----------------------------------------------------------------
 Index::Index(TreeFile* t) {
+    // Pre: um ponteiro para uma classe TreeFile inicializada (objeto).
+    // Pos: armazena numa variavel interna um ponteiro para o objeto
+    // dado, para uso interno da classe.
     treeFile = t;
 }
 
+// ----------------------------------------------------------------
 Index::~Index() {
     // clear
 }
 
-Index::mSearchResut Index::mSearch(int x) {
+// ----------------------------------------------------------------
+Index::mSearchResut Index::mSearch(int x) { // versao publica
+    // Pre: classe inicializada.
+    // Pos: tenta localizar um valor no index e retorna sua localizacao
+    // caso o encontre no formato: (pos, i, found).
     return mSearch(treeFile, x);
 }
 
+// ----------------------------------------------------------------
 int Index::linearSearch(vector<int> &K, int x, int n) {
+    // Pre: vetor de valores de um no, o valor a ser procurado e o 
+    // numero de valores num vetor.
+    // Pos: retorna a posicao do valor a ser procurado no vetor dado
+    // ou o proprio n caso nao o encontre.
     int i = 0;
     while (i <= n && K[i] < x) {
         i++;
@@ -29,7 +43,11 @@ int Index::linearSearch(vector<int> &K, int x, int n) {
     return i;
 }
 
-Index::mSearchResut Index::mSearch(TreeFile* treeFile, int x) {
+// ----------------------------------------------------------------
+Index::mSearchResut Index::mSearch(TreeFile* treeFile, int x) { // versao privada
+    // Pre: classe inicializada.
+    // Pos: tenta localizar um valor no index e retorna sua localizacao
+    // caso o encontre no formato: (pos, i, found).
     TreeFile::node node;
     mSearchResut result;
     int p = treeFile->getIndexRoot(); 
