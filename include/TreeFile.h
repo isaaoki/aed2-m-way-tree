@@ -19,15 +19,16 @@ class TreeFile {
         node getTreeRoot();
         node getNextNode();
         node getNthNode(int n);
-        void writeNode(TreeFile::node newNode);
-        void removeNode(int n);
+        static void printNode(node node);
+        void printTree();
+        int getSize();
+        int getIndexRoot();
 
     private:
         fstream tree;
-        int size;
-        int root;
-        int nextFreeNode;
-        void writeMetaInfo();
+        int size; // total de nos
+        int root; 
+        void createTree();
 };
 
 #endif

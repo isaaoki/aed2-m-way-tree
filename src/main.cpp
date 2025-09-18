@@ -1,24 +1,34 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
-#include <cstdlib>
+#include <vector>
+#include <limits.h>
 using namespace std;
-#include "TreeFile.cpp"
+
+#include "../include/TreeFile.h"
+#include "../include/Index.h"
 
 int main() {
     TreeFile t;
-    TreeFile::node node;
+    Index index(&t);
+    Index::mSearchResut searchResult;
+    int x;
+    string isRunning;
 
-    t.writeNode(t.getTreeRoot());
-    // teste da funcao getNthNode
-    for(int j = 1; j < 7; j++) {
-        node = t.getNthNode(j);
-        cout << node.n << " " << node.A[0] << " ";
-        for(int i = 1; i <= node.n && i < 5; i++) {
-            cout << node.K[i] << " " << node.A[i] << " ";
-        }
-        cout << endl;
-    }
+    do {
+        t.printTree();
+        cout << "Chave de busca: ";
+        cin >> x;
 
-    t.~TreeFile(); // fecha o arquivo e salva-o no disco
+        searchResult = index.mSearch(x);
+
+        cout << setw(4) << x << " ("
+             << searchResult.pos << "," << searchResult.i << ",";
+        cout << (searchResult.found ? "true" : "false") << ")" << endl;
+
+        cout << "Continuar busca (s/n)? ";
+        cin >> isRunning;
+    } while (isRunning != "n");
+
+    return 0; // fecha o arquivo e salva-o no disco
 }
-
