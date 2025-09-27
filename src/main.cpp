@@ -11,7 +11,7 @@ using namespace std;
 int main() {
     TreeFile t;
     Index index(&t);
-    Index::mSearchResut searchResult;
+    Index::mSearchResult searchResult;
     int x;
     string isRunning;
 

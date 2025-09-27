@@ -5,26 +5,28 @@
 #define INDEX_H
 
 #include "../include/TreeFile.h"
+#include <stack>
 
 class Index {
     public:
         Index(TreeFile* t);
         ~Index();
 
-        struct mSearchResut {
+        struct mSearchResult {
             int pos;
             int i;
             bool found;
+            stack<TreeFile::node> visitedNodes;
         };
 
-        mSearchResut mSearch(int x);
+        mSearchResult mSearch(int x);
 
     private:
         TreeFile* treeFile;
         
         int linearSearch(vector<int> &K, int x, int n);
-        mSearchResut mSearch(TreeFile* treeFile, int x);
-
+        mSearchResult mSearch(TreeFile* treeFile, int x);
+        void insertB(TreeFile* treeFile, int x);
 };
 
 #endif
