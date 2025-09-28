@@ -8,27 +8,61 @@ using namespace std;
 #include "../include/TreeFile.h"
 #include "../include/Index.h"
 
+void printMenu() {
+    cout << "MENU PRINCIPAL" << endl;
+    cout << "1) Imprimir indice (arvore B)" << endl;
+    cout << "2) Imprimir conteudo do arquivo principal" << endl;
+    cout << "3) Buscar elemento no indice" << endl;
+    cout << "4) Inserir novo elemento" << endl;
+    cout << "5) Sair" << endl;
+    cout << "Escolha uma opcao: ";
+}
+
 int main() {
     TreeFile t;
     Index index(&t);
     Index::mSearchResult searchResult;
-    int x;
-    string isRunning;
+    bool isRunning = true;
+    int x, opcao;
+    string corpo;
+    float massa;
 
     do {
-        t.printTree();
-        cout << "Chave de busca: ";
-        cin >> x;
+        printMenu();
+        cin >> opcao;
 
-        searchResult = index.mSearch(x);
+        switch (opcao) {
+            case 1: 
+                t.printTree();
+                break;
+            case 2:
+                // imprimir conteudo do arquivo principal
+                break;
+            case 3:
+                cout << "Digite a chave de busca: ";
+                cin >> x;
+                searchResult = index.mSearch(x);
 
-        cout << setw(4) << x << " ("
-             << searchResult.pos << "," << searchResult.i << ",";
-        cout << (searchResult.found ? "true" : "false") << ")" << endl;
+                cout << setw(4) << x << " ("
+                     << searchResult.pos << "," << searchResult.i << ",";
+                cout << (searchResult.found ? "true" : "false") << ")" << endl;
 
-        cout << "Continuar busca (s/n)? ";
-        cin >> isRunning;
-    } while (isRunning != "n");
+                break;
+            case 4:
+                cout << "Digite o nome do corpo a ser inserido: ";
+                cin >> corpo;
+                cout << "Digite a massa do corpo: ";
+                cin >> massa; 
+                // inserir corpo celeste no arquivo principal e no indice
+                break;
+            case 5: 
+                isRunning = false;
+                break;
+            default:
+                cout << "Opcao invalida! Tente novamente...";
+                break;
+        }
+    } while (!isRunning);
 
     return 0; // fecha o arquivo e salva-o no disco
 }
