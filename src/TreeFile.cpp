@@ -31,6 +31,7 @@ TreeFile::TreeFile(){
 TreeFile::~TreeFile(){
     // Pre: nenhuma.
     // Pos: fecha o arquivo binario.
+    writeMetaInfo();
     tree.close();
 }
 
@@ -78,6 +79,12 @@ TreeFile::node TreeFile::getNthNode(int n) {
         cout << "Erro: tentativa de acessar no inexistente."<< endl;
         abort();
     }
+}
+
+// ----------------------------------------------------------------
+void TreeFile::writeNode(node newNode) { 
+    tree.seekp(++size * sizeof(node));
+    tree.write((const char *)(&newNode), sizeof(node));
 }
 
 // ----------------------------------------------------------------
@@ -203,4 +210,13 @@ int TreeFile::getIndexRoot() {
     // Pre: classe inicializada.
     // Pos: retorna o index da raiz da arvore.
     return root;
+}
+
+// ----------------------------------------------------------------
+void TreeFile::writeMetaInfo() {
+    node p;
+    p.n = size;
+    p.A[0] = root;
+    tree.seekp(0);
+    tree.write((const char *)(&p),sizeof(node));
 }

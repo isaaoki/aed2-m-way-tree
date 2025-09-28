@@ -14,11 +14,13 @@ class TreeFile {
             int n;
             int A[m];
             int K[m];
+            int B[m];
         };
 
         node getTreeRoot();
         node getNextNode();
         node getNthNode(int n);
+        void writeNode(node newNode);
         static void printNode(node node);
         void printTree();
         int getSize();
@@ -27,7 +29,8 @@ class TreeFile {
     private:
         fstream tree;
         int size; // total de nos
-        int root; 
+        int root;
+        void writeMetaInfo();
         void createTree();
 };
 
