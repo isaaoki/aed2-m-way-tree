@@ -87,6 +87,11 @@ void TreeFile::writeNode(node newNode) {
     tree.write((const char *)(&newNode), sizeof(node));
 }
 
+void TreeFile::writeNode(node newNode, int pos) {
+    tree.seekp(pos * sizeof(node));
+    tree.write((const char*)(&newNode), sizeof(node));
+}
+
 // ----------------------------------------------------------------
 void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
@@ -210,6 +215,10 @@ int TreeFile::getIndexRoot() {
     // Pre: classe inicializada.
     // Pos: retorna o index da raiz da arvore.
     return root;
+}
+
+void TreeFile::setIndexRoot(int pos) {
+    root = pos;
 }
 
 // ----------------------------------------------------------------

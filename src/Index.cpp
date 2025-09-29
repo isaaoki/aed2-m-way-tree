@@ -6,6 +6,8 @@
 #include <vector>
 #include <limits.h>
 #include <cmath>
+#include <tuple>
+
 using namespace std;
 
 #include "../include/Index.h"
@@ -29,6 +31,10 @@ Index::mSearchResult Index::mSearch(int x) { // versao publica
     // Pos: tenta localizar um valor no index e retorna sua localizacao
     // caso o encontre no formato: (pos, i, found).
     return mSearch(treeFile, x);
+}
+
+void Index::insertB(int x) {
+    return insertB(treeFile, x);
 }
 
 // ----------------------------------------------------------------
@@ -58,7 +64,7 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
     while (p != 0) {
         // Ler nó e colocar na pilha
         node = treeFile->getNthNode(p);
-        result.visitedNodes.push(node);
+        result.visitedNodes.push(make_tuple(node, p));
 
         // Ajuste do array para incluir MIN_VALUE e MAX_VALUE
         vector<int> K(node.n + 2); 
@@ -86,50 +92,79 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
 }
 
 void Index::insertB(TreeFile* treeFile, int x) {
-    int K = x; // (K, A) é o par a ser inserido
+    // (K, A) é o par a ser inserido
+    int K = x; 
     int A = 0;
     TreeFile::node nodeP, nodeQ;
+    int indexP, indexQ;
 
     mSearchResult searchResult = mSearch(treeFile, x);    
 
     // x já está em T
-    if (searchResult.found) return;
+    if (searchResult.found) {
+        cout << "Erro: insercao de um valor existente." << endl;
+        return;
+    }
 
     while (!searchResult.visitedNodes.empty()) {
         // Usa ultimo nó empilhado
-        nodeP = searchResult.visitedNodes.top();
+        nodeP = get<0>(searchResult.visitedNodes.top());
+        indexP = get<1>(searchResult.visitedNodes.top());
         searchResult.visitedNodes.pop();
  
         // Se elemento pode ser inserido no nó
-        if (nodeP.n <= treeFile->m - 1) { 
-            nodeP.n++; 
-
-            for (int i = nodeP.n; i > searchResult.i; i--) {
+        if (nodeP.n < treeFile->m - 1) {  
+            nodeP.n++;
+            for (int i = nodeP.n; i > searchResult.i + 1; i--) {
                 nodeP.K[i] = nodeP.K[i - 1];
                 nodeP.A[i] = nodeP.A[i - 1];
             }
 
-            nodeP.K[searchResult.i] = K;
-            nodeP.A[searchResult.i] = A;
+            nodeP.K[searchResult.i + 1] = K;
+            nodeP.A[searchResult.i + 1] = A;
 
-            // Escrever p para disco
+            treeFile->writeNode(nodeP, indexP);
             return;
         } 
 
-        // Definindo nó P e Q
-        int half = ceil((treeFile->m + 1)/2);
-        nodeQ.n = nodeP.n - half;
-        for (int i = 1; i <= nodeQ.n; i++) {
-            nodeQ.K[i] = nodeP.K[half + i];
-            nodeQ.A[i] = nodeP.A[half + i];
-        }
-        nodeQ.A[0] = nodeP.A[half];
-        nodeP.n = half - 1;
+        // Definindo nó P e Q com vetores temporarios
+        int tempK[treeFile->m + 1];
+        int tempA[treeFile->m + 1];
+        tempA[0] = nodeP.A[0];
+        tempK[searchResult.i + 1] = K;
+        tempA[searchResult.i + 1] = A;
 
-        // Escrever p e q para disco
+        for (int i = 1; i < searchResult.i + 1; i++) {
+            tempK[i] = nodeP.K[i];
+            tempA[i] = nodeP.A[i];
+        }
+        for (int i = searchResult.i + 1; i <= nodeP.n; i++) {
+            tempK[i + 1] = nodeP.K[i];
+            tempA[i + 1] = nodeP.A[i];
+        }
+
+        int half = (int)ceil((treeFile->m)/2);
+
+        nodeQ.n = nodeP.n - half;
+        nodeQ.A[0] = tempA[half];
+        for (int i = 1; i <= nodeQ.n; i++) {
+            nodeQ.K[i] = tempK[half + i];
+            nodeQ.A[i] = tempA[half + i];
+        }
+
+        nodeP.n = half - 1;
+        nodeP.A[0] = tempA[0];
+        for (int i = 1; i <= nodeP.n; i++) {
+            nodeP.K[i] = tempK[i];
+            nodeP.A[i] = tempA[i];
+        }
 
         K = nodeP.K[half];
-        // A = nodeQ;
+        A = treeFile->getSize();
+
+        // Escrever p e q para disco
+        treeFile->writeNode(nodeP, indexP);
+        treeFile->writeNode(nodeQ);
     }
 
     TreeFile::node nodeRoot;
@@ -139,4 +174,8 @@ void Index::insertB(TreeFile* treeFile, int x) {
     nodeRoot.A[1] = A;
 
     // Atualizar raiz e escrever raíz no disco
+    treeFile->writeNode(nodeRoot);
+    treeFile->setIndexRoot(treeFile->getSize());
+
+    cout << "Insercao completa!" << endl;
 }

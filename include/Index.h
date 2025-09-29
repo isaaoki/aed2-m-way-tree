@@ -16,17 +16,19 @@ class Index {
             int pos;
             int i;
             bool found;
-            stack<TreeFile::node> visitedNodes;
+            stack<tuple<TreeFile::node, int>> visitedNodes;
         };
 
         mSearchResult mSearch(int x);
-
+        void insertB(int x);
+                
     private:
         TreeFile* treeFile;
         
         int linearSearch(vector<int> &K, int x, int n);
         mSearchResult mSearch(TreeFile* treeFile, int x);
         void insertB(TreeFile* treeFile, int x);
+
 };
 
 #endif

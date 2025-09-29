@@ -24,8 +24,6 @@ int main() {
     Index::mSearchResult searchResult;
     bool isRunning = true;
     int x, opcao;
-    string corpo;
-    float massa;
 
     do {
         printMenu();
@@ -49,10 +47,9 @@ int main() {
 
                 break;
             case 4:
-                cout << "Digite o nome do corpo a ser inserido: ";
-                cin >> corpo;
-                cout << "Digite a massa do corpo: ";
-                cin >> massa; 
+                cout << "Digite o nro ser inserido: ";
+                cin >> x;
+                index.insertB(x);
                 // inserir corpo celeste no arquivo principal e no indice
                 break;
             case 5: 
@@ -62,7 +59,7 @@ int main() {
                 cout << "Opcao invalida! Tente novamente...";
                 break;
         }
-    } while (!isRunning);
+    } while (isRunning);
 
     return 0; // fecha o arquivo e salva-o no disco
 }

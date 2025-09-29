@@ -21,10 +21,12 @@ class TreeFile {
         node getNextNode();
         node getNthNode(int n);
         void writeNode(node newNode);
+        void writeNode(node newNode, int pos);
         static void printNode(node node);
         void printTree();
         int getSize();
         int getIndexRoot();
+        void setIndexRoot(int pos);
 
     private:
         fstream tree;
