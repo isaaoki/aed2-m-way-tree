@@ -1,11 +1,13 @@
 // Index.h
 // Index usage and manipulation
+#include <stack>
+#include <tuple>
+using namespace std;
 
 #ifndef INDEX_H
 #define INDEX_H
 
 #include "../include/TreeFile.h"
-#include <stack>
 
 class Index {
     public:
@@ -13,10 +15,9 @@ class Index {
         ~Index();
 
         struct mSearchResult {
-            int pos;
-            stack<int> i;
+            stack<tuple<TreeFile::node, int>> visitedNodes; // Nós percorridos e posição
+            stack<int> i; // Ai dos nós percorridos
             bool found;
-            stack<tuple<TreeFile::node, int>> visitedNodes;
         };
 
         mSearchResult mSearch(int x);

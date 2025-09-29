@@ -33,7 +33,10 @@ Index::mSearchResult Index::mSearch(int x) { // versao publica
     return mSearch(treeFile, x);
 }
 
-void Index::insertB(int x) {
+// ----------------------------------------------------------------
+void Index::insertB(int x) { // versao publica
+    // Pre: classe inicializada.
+    // Pos: tenta inserir um valor x no index
     return insertB(treeFile, x);
 }
 
@@ -66,7 +69,7 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
         // Ler nó e colocar na pilha
         node = treeFile->getNthNode(p);
         result.visitedNodes.push(make_tuple(node, p));
-
+        
         // Ajuste do array para incluir MIN_VALUE e MAX_VALUE
         vector<int> K(node.n + 2); 
         K[0] = INT_MIN;
@@ -77,7 +80,6 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
         i = linearSearch(K, x, node.n);
 
         if (x == K[i]) {
-            result.pos = p;
             result.found = true;
             result.i.push(i);
             return result;
@@ -90,16 +92,19 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
 
     }
 
-    result.pos = q;
     return result;
 }
 
-void Index::insertB(TreeFile* treeFile, int x) {
+// ----------------------------------------------------------------
+void Index::insertB(TreeFile* treeFile, int x) { // versao privada
+    // Pre: classe inicializada.
+    // Pos: tenta localizar e inserir um valor no index.
+
     // (K, A) é o par a ser inserido
     int K = x; 
     int A = 0;
     TreeFile::node nodeP, nodeQ;
-    int indexP, index;
+    int pos, index;
 
     mSearchResult searchResult = mSearch(treeFile, x);    
 
@@ -112,24 +117,26 @@ void Index::insertB(TreeFile* treeFile, int x) {
     while (!searchResult.visitedNodes.empty()) {
         // Usa ultimo nó empilhado
         nodeP = get<0>(searchResult.visitedNodes.top());
-        indexP = get<1>(searchResult.visitedNodes.top());
-        searchResult.visitedNodes.pop();
+        pos = get<1>(searchResult.visitedNodes.top());
         index = searchResult.i.top();
+
+        searchResult.visitedNodes.pop();
         searchResult.i.pop();
 
         // Se elemento pode ser inserido no nó
         if (nodeP.n < treeFile->m - 1) {  
+            // Arruma as chaves para o local correto
             for (int i = nodeP.n; i >= index + 1; i--) {
                 nodeP.K[i + 1] = nodeP.K[i];
                 nodeP.A[i + 1] = nodeP.A[i];
             }
+
+            // Insere chave nova
             nodeP.K[index + 1] = K;
             nodeP.A[index + 1] = A;
 
             nodeP.n++;
-
-            treeFile->writeNode(nodeP, indexP);
-            cout << "Insercao completa!" << endl;
+            treeFile->writeNode(nodeP, pos);
             return;
         } 
 
@@ -153,12 +160,6 @@ void Index::insertB(TreeFile* treeFile, int x) {
             tempK[i + 1] = nodeP.K[i];
             tempA[i + 1] = nodeP.A[i];
         }
-
-        cout << "A[0]: " << tempA[0] << endl;
-        for (int i = 1; i <= treeFile->m; i++) {
-            cout << "K[" << i << "]: " << tempK[i] << endl;
-            cout << "A[" << i << "]: " << tempA[i] << endl;
-        }
         
         int half = (int)ceil((treeFile->m)/2.0);
         cout << "Half: " << half << endl;
@@ -169,8 +170,6 @@ void Index::insertB(TreeFile* treeFile, int x) {
         for (int i = 1; i <= nodeQ.n; i++) {
             nodeQ.K[i] = tempK[half + i];
             nodeQ.A[i] = tempA[half + i];
-            cout << "Node Q - K[" << i << "]: " << nodeQ.K[i] << endl;
-            cout << "Node Q - A[" << i << "]: " << nodeQ.A[i] << endl;
         } 
 
         nodeP.n = half - 1;
@@ -178,19 +177,17 @@ void Index::insertB(TreeFile* treeFile, int x) {
         for (int i = 1; i <= nodeP.n; i++) {
             nodeP.K[i] = tempK[i];
             nodeP.A[i] = tempA[i];
-            cout << "Node P - K[" << i << "]: " << nodeP.K[i] << endl;
-            cout << "Node P - A[" << i << "]: " << nodeP.A[i] << endl;
         }
 
         // Escrever p e q para disco
         K = tempK[half];
         A = treeFile->getSize() + 1;
-        cout << "K: " << K << " A: " << A << endl;
 
-        treeFile->writeNode(nodeP, indexP);
+        treeFile->writeNode(nodeP, pos);
         treeFile->writeNode(nodeQ);
     }
 
+    // Escreve uma nova raíz      
     TreeFile::node nodeRoot;
     nodeRoot.n = 1;
     nodeRoot.A[0] = treeFile->getIndexRoot();
@@ -201,5 +198,4 @@ void Index::insertB(TreeFile* treeFile, int x) {
     treeFile->writeNode(nodeRoot);
     treeFile->setIndexRoot(treeFile->getSize());
 
-    cout << "Insercao completa!" << endl;
 }
