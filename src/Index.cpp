@@ -146,11 +146,6 @@ tuple<int, int> Index::insertB(TreeFile* treeFile, double x, int b) { // versao 
 
             nodeP.n++;
 
-            for (int i = 1; i <= nodeP.n; i++) {
-                cout << "K[" << i << "]: " << nodeP.K[i] << endl;
-                cout << "A[" << i << "]: " << nodeP.A[i] << endl;
-                cout << "B[" << i << "]: " << nodeP.B[i] << endl;
-            }
             treeFile->writeNode(nodeP, pos);
             write++;
             accessNumber = make_tuple(searchResult.read, write);
@@ -183,12 +178,6 @@ tuple<int, int> Index::insertB(TreeFile* treeFile, double x, int b) { // versao 
         }
         
         int half = (int)ceil((treeFile->getM())/2.0);
-        cout << "A[0]: " << tempA[0] << endl;
-        for (int i = 1; i <= treeFile->m; i++) {
-            cout << "K[" << i << "]: " << tempK[i] << endl;
-            cout << "A[" << i << "]: " << tempA[i] << endl;
-            cout << "B[" << i << "]: " << tempB[i] << endl;
-        }
 
         // Cria no Q e P
         nodeQ.n = treeFile->getM() - half;
@@ -197,10 +186,6 @@ tuple<int, int> Index::insertB(TreeFile* treeFile, double x, int b) { // versao 
             nodeQ.K[i] = tempK[half + i];
             nodeQ.A[i] = tempA[half + i];
             nodeQ.B[i] = tempB[half + i];
-
-            cout << "Node Q - K[" << i << "]: " << nodeQ.K[i] << endl;
-            cout << "Node Q - A[" << i << "]: " << nodeQ.A[i] << endl;
-            cout << "Node Q - B[" << i << "]: " << nodeQ.B[i] << endl;
         } 
 
         nodeP.n = half - 1;
@@ -209,17 +194,12 @@ tuple<int, int> Index::insertB(TreeFile* treeFile, double x, int b) { // versao 
             nodeP.K[i] = tempK[i];
             nodeP.A[i] = tempA[i];
             nodeP.B[i] = tempB[i];
-            cout << "Node P - K[" << i << "]: " << nodeP.K[i] << endl;
-            cout << "Node P - A[" << i << "]: " << nodeP.A[i] << endl;
-            cout << "Node P - B[" << i << "]: " << nodeP.B[i] << endl;
-
         }
 
         // Escrever p e q para disco
         K = tempK[half];
         B = tempB[half];
         A = treeFile->getSize() + 1;
-        cout << "K: " << K << " A: " << A << " B: "<< B << endl;
 
         treeFile->writeNode(nodeP, pos);
         treeFile->writeNode(nodeQ);
