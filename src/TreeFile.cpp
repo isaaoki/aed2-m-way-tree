@@ -87,6 +87,11 @@ void TreeFile::writeNode(node newNode) {
     tree.write((const char *)(&newNode), sizeof(node));
 }
 
+void TreeFile::writeNode(node newNode, int pos) {
+    tree.seekp(pos * sizeof(node));
+    tree.write((const char*)(&newNode), sizeof(node));
+}
+
 // ----------------------------------------------------------------
 void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
@@ -107,6 +112,7 @@ void TreeFile::printTree() {
     // Pre: arquivo binario tree aberto.
     // Pos: imprime na tela a arvore completa, inclusive sua raiz e
     // o valor de m com uma formatacao amigavel.
+    cout << "ARVORE B" << endl;
     cout << "T = " << root << ", m = " << m << endl;
     cout << string(66, '-') << endl;
     cout << left << setw(6) << "No" 
@@ -210,6 +216,10 @@ int TreeFile::getIndexRoot() {
     // Pre: classe inicializada.
     // Pos: retorna o index da raiz da arvore.
     return root;
+}
+
+void TreeFile::setIndexRoot(int pos) {
+    root = pos;
 }
 
 // ----------------------------------------------------------------
