@@ -7,11 +7,8 @@
 using namespace std;
 
 #include "../include/TreeFile.h"
-#include "TreeFile.cpp"
 #include "../include/Index.h"
-#include "Index.cpp"
 #include "../include/DataFile.h"
-#include "DataFile.cpp"
 
 void printMenu() {
     cout << "MAIN MENU" << endl;
