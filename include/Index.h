@@ -14,7 +14,7 @@ class Index {
 
         struct mSearchResult {
             int pos;
-            int i;
+            stack<int> i;
             bool found;
             stack<tuple<TreeFile::node, int>> visitedNodes;
         };

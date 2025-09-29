@@ -42,7 +42,7 @@ int main() {
                 searchResult = index.mSearch(x);
 
                 cout << setw(4) << x << " ("
-                     << searchResult.pos << "," << searchResult.i << ",";
+                     << searchResult.pos << "," << searchResult.i.top() << ",";
                 cout << (searchResult.found ? "true" : "false") << ")" << endl;
 
                 break;

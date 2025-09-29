@@ -59,6 +59,7 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
     mSearchResult result;
     int p = treeFile->getIndexRoot(); 
     int q = 0;
+    int i;
     result.found = false; 
 
     while (p != 0) {
@@ -73,16 +74,18 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
         K[node.n + 1] = INT_MAX;
 
         // Busca do indice Ki
-        result.i = linearSearch(K, x, node.n);
+        i = linearSearch(K, x, node.n);
 
-        if (x == K[result.i]) {
+        if (x == K[i]) {
             result.pos = p;
             result.found = true;
+            result.i.push(i);
             return result;
         } else {            
-            result.i--;
+            i--;
             q = p;
-            p = node.A[result.i]; // Desce para subarvore correta
+            p = node.A[i]; // Desce para subarvore correta
+            result.i.push(i);
         }
 
     }
@@ -96,7 +99,7 @@ void Index::insertB(TreeFile* treeFile, int x) {
     int K = x; 
     int A = 0;
     TreeFile::node nodeP, nodeQ;
-    int indexP, indexQ;
+    int indexP, index;
 
     mSearchResult searchResult = mSearch(treeFile, x);    
 
@@ -111,19 +114,22 @@ void Index::insertB(TreeFile* treeFile, int x) {
         nodeP = get<0>(searchResult.visitedNodes.top());
         indexP = get<1>(searchResult.visitedNodes.top());
         searchResult.visitedNodes.pop();
- 
+        index = searchResult.i.top();
+        searchResult.i.pop();
+
         // Se elemento pode ser inserido no nó
         if (nodeP.n < treeFile->m - 1) {  
-            nodeP.n++;
-            for (int i = nodeP.n; i > searchResult.i + 1; i--) {
-                nodeP.K[i] = nodeP.K[i - 1];
-                nodeP.A[i] = nodeP.A[i - 1];
+            for (int i = nodeP.n; i >= index + 1; i--) {
+                nodeP.K[i + 1] = nodeP.K[i];
+                nodeP.A[i + 1] = nodeP.A[i];
             }
+            nodeP.K[index + 1] = K;
+            nodeP.A[index + 1] = A;
 
-            nodeP.K[searchResult.i + 1] = K;
-            nodeP.A[searchResult.i + 1] = A;
+            nodeP.n++;
 
             treeFile->writeNode(nodeP, indexP);
+            cout << "Insercao completa!" << endl;
             return;
         } 
 
@@ -131,38 +137,56 @@ void Index::insertB(TreeFile* treeFile, int x) {
         int tempK[treeFile->m + 1];
         int tempA[treeFile->m + 1];
         tempA[0] = nodeP.A[0];
-        tempK[searchResult.i + 1] = K;
-        tempA[searchResult.i + 1] = A;
 
-        for (int i = 1; i < searchResult.i + 1; i++) {
+        // Preenche parte da esquerda
+        for (int i = 1; i <= index; i++) {
             tempK[i] = nodeP.K[i];
             tempA[i] = nodeP.A[i];
         }
-        for (int i = searchResult.i + 1; i <= nodeP.n; i++) {
+
+        // Insere chave
+        tempK[index + 1] = K;
+        tempA[index + 1] = A;
+
+        // Preenche parte da direita
+        for (int i = index + 1; i <= nodeP.n; i++) {
             tempK[i + 1] = nodeP.K[i];
             tempA[i + 1] = nodeP.A[i];
         }
 
-        int half = (int)ceil((treeFile->m)/2);
+        cout << "A[0]: " << tempA[0] << endl;
+        for (int i = 1; i <= treeFile->m; i++) {
+            cout << "K[" << i << "]: " << tempK[i] << endl;
+            cout << "A[" << i << "]: " << tempA[i] << endl;
+        }
+        
+        int half = (int)ceil((treeFile->m)/2.0);
+        cout << "Half: " << half << endl;
 
-        nodeQ.n = nodeP.n - half;
+        // Cria nó Q e P
+        nodeQ.n = treeFile->m - half;
         nodeQ.A[0] = tempA[half];
         for (int i = 1; i <= nodeQ.n; i++) {
             nodeQ.K[i] = tempK[half + i];
             nodeQ.A[i] = tempA[half + i];
-        }
+            cout << "Node Q - K[" << i << "]: " << nodeQ.K[i] << endl;
+            cout << "Node Q - A[" << i << "]: " << nodeQ.A[i] << endl;
+        } 
 
         nodeP.n = half - 1;
         nodeP.A[0] = tempA[0];
         for (int i = 1; i <= nodeP.n; i++) {
             nodeP.K[i] = tempK[i];
             nodeP.A[i] = tempA[i];
+            cout << "Node P - K[" << i << "]: " << nodeP.K[i] << endl;
+            cout << "Node P - A[" << i << "]: " << nodeP.A[i] << endl;
         }
 
-        K = nodeP.K[half];
-        A = treeFile->getSize();
-
         // Escrever p e q para disco
+        K = tempK[half];
+        A = treeFile->getSize() + 1;
+        cout << "K: " << K << " A: " << A << endl;
+
         treeFile->writeNode(nodeP, indexP);
         treeFile->writeNode(nodeQ);
     }
