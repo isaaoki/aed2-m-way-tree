@@ -15,20 +15,22 @@ class Index {
         ~Index();
 
         struct mSearchResult {
-            stack<tuple<TreeFile::node, int>> visitedNodes; // Nós percorridos e posição
-            stack<int> i; // Ai dos nós percorridos
+            stack<tuple<TreeFile::node, int>> visitedNodes; // Nos percorridos e posicao
+            stack<int> i; // Ai dos nos percorridos
+            int b;
             bool found;
+            int read = 0;
         };
 
-        mSearchResult mSearch(int x);
-        void insertB(int x);
+        mSearchResult mSearch(double x);
+        tuple<int, int> insertB(double x, int b);
                 
     private:
         TreeFile* treeFile;
         
-        int linearSearch(vector<int> &K, int x, int n);
-        mSearchResult mSearch(TreeFile* treeFile, int x);
-        void insertB(TreeFile* treeFile, int x);
+        int linearSearch(vector<double> &K, double x, int n);
+        mSearchResult mSearch(TreeFile* treeFile, double x);
+        tuple<int, int> insertB(TreeFile* treeFile, double x, int b);
 
 };
 

@@ -17,16 +17,13 @@ DataFile::DataFile(){
     data.open("../files/data.bin", ios::in | ios::out | ios::binary);
 
     if(!data.is_open()) {
-        // createTree();
+        createFile();
     } else {
-        /*
-        node p;
-        tree.seekg(0);
-        tree.read((char *)(&p), sizeof(node));
-        size = p.n;
-        root = p.A[0];
-        tree.seekg(1 * sizeof(node));
-        */
+        registry r;
+        data.seekp(0);
+        data.read((char *)(&r), sizeof(registry));
+        size = r.satellites;
+        data.seekg(1 * sizeof(registry));
     }
 }
 
@@ -34,6 +31,7 @@ DataFile::DataFile(){
 DataFile::~DataFile(){
     // Pre: nenhuma.
     // Pos: fecha o arquivo binario.
+    writeMetaInfo();
     data.close();
 }
 
@@ -68,15 +66,20 @@ DataFile::registry DataFile::getNthRegistry(int n) {
     if(! data.eof()) { // tratamento de erro no qual tenta-se ler um registro depois do final do arquivo
         return r;
     } else {
-        cout << "Erro: tentativa de acessar registro inexistente."<< endl;
+        cout << "Error: inexistent registry being accessed."<< endl;
         abort();
     }
 }
 
 // ----------------------------------------------------------------
-void DataFile::writeRegistry(registry newRegistry) { 
+int DataFile::writeRegistry(registry newRegistry) { 
+    // Pre: arquivo binario data aberto e uma estrutura de registro 
+    // a ser escrita em memoria secundaria.
+    // Pos Escreve a estrutura de registro em memoria secundaria e
+    // retorna o index onde a mesma foi escrita.
     data.seekp(++size * sizeof(registry));
     data.write((const char *)(&newRegistry), sizeof(registry));
+    return size;
 }
 
 // ----------------------------------------------------------------
@@ -84,10 +87,70 @@ void DataFile::printRegistry(registry registry) {
     // Pre: uma estrutura de registro a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
     // Pos: imprime na tela o registro dado com uma formatacao amigavel.
-    cout << fixed << setprecision(2) << setw(12) << registry.mass << " * 10^15 Kg, "
-    << right << setw(24) << registry.name << ", "
-    << left << fixed << setprecision(3) << setw(6) << registry.radius << " Km, "
-    << left << fixed << setprecision(1) << setw(4) << registry.distanceFromSun << " * 10^6 Km, "
-    << left << fixed << setprecision(1) << setw(4) << registry.density << " Kg/m^3, "
-    cout << endl;
+    cout << left << fixed << setprecision(2)
+         << setw(18) << registry.mass 
+         << setw(24) << registry.name 
+         << setw(12) << registry.radius
+         << setw(27) << registry.distanceFromSun
+         << setw(12) << registry.satellites
+         << setw(8) << (registry.isMoon ? "YES" : "NO") << endl;
+}
+
+// ----------------------------------------------------------------
+void DataFile::printFile() {
+    // Pre: arquivo binario data aberto.
+    // Pos: imprime na tela o arquivo de dados completo, inclusive 
+    // seu tamanho com uma formatacao amigavel.
+    cout << "CELESTIAL BODIES" << endl;
+    cout << "Number of registries = " << size << endl;
+    cout << string(100, '-') << endl;
+
+    cout << left 
+         << setw(18) << "Mass (10^15 Kg)" 
+         << setw(24) << "Name"
+         << setw(12) << "Radius (km)"
+         << setw(28) << "Distance from Sun (10^6 Km)"
+         << setw(12) << "Satellites"
+         << setw(8) << "isMoon?" << endl;
+
+    cout << string(100, '-') << endl;
+
+    data.seekg(1 * sizeof(registry));
+    for (int i = 1; i <= size; i++) {
+        printRegistry(getNextRegistry());
+    }
+    data.seekg(1 * sizeof(registry));
+
+    cout << string(100, '-') << endl;
+}
+
+// ----------------------------------------------------------------
+void DataFile::createFile() {
+    // Pre: nenhuma.
+    // Pos: cria um arquivo de arvore de m-vias vazio.
+    ofstream dataCreation("../files/data.bin", ios::out | ios::binary);
+    if(!dataCreation.is_open()){
+        cerr << "Error: data.bin file cannot be open (possible memory error)." << endl;
+        abort();
+    }
+    registry r;
+    r.satellites = 0;
+    dataCreation.seekp(0);
+    dataCreation.write((const char *)(&r),sizeof(registry));
+    dataCreation.close();
+
+    data.open("../files/data.bin", ios::in | ios::out | ios::binary);
+
+    cout << "Binary file created with success! Continuing the execution..." << endl << endl;
+}
+
+// ----------------------------------------------------------------
+void DataFile::writeMetaInfo() {
+    // Pre: classe inicializada.
+    // Pos: salva as meta informacoes do arquivo em memoria secundaria
+    // (tamanho).
+    registry r;
+    r.satellites = size;
+    data.seekp(0);
+    data.write((const char *)(&r), sizeof(registry));
 }

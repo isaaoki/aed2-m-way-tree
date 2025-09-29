@@ -14,18 +14,13 @@ class DataFile {
             char name[25];
             float radius; // in Km
             double distanceFromSun; // in GigaMeters or 10^6 Km
-            float density; // in Kg/m^3
-            float gravityOnSurface; // in m/s^2
-            float rotationPeriod; // in hours
-            float orbitalPeriod; // in days
-            char atmosphereComposition;
-            short satellites;
+            int satellites;
             bool isMoon;
         };
 
         registry getNextRegistry();
         registry getNthRegistry(int n);
-        void writeRegistry(registry registry);
+        int writeRegistry(registry registry);
         static void printRegistry(registry registry);
         void printFile();
         int getSize();
@@ -34,6 +29,7 @@ class DataFile {
         fstream data;
         int size; // total de registros
         void createFile();
+        void writeMetaInfo();
 };
 
 #endif

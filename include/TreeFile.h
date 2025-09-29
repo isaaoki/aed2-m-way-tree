@@ -13,7 +13,7 @@ class TreeFile {
         struct node {
             int n;
             int A[m];
-            int K[m];
+            double K[m];
             int B[m];
         };
 
@@ -24,12 +24,14 @@ class TreeFile {
         void writeNode(node newNode, int pos);
         static void printNode(node node);
         void printTree();
+        int getM();
         int getSize();
         int getIndexRoot();
         void setIndexRoot(int pos);
 
     private:
         fstream tree;
+        int nodeSize;
         int size; // total de nos
         int root;
         void writeMetaInfo();

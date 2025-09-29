@@ -25,6 +25,7 @@ TreeFile::TreeFile(){
         root = p.A[0];
         tree.seekg(1 * sizeof(node));
     }
+
 }
 
 // ----------------------------------------------------------------
@@ -83,11 +84,19 @@ TreeFile::node TreeFile::getNthNode(int n) {
 
 // ----------------------------------------------------------------
 void TreeFile::writeNode(node newNode) { 
+    // Pre: arquivo binario tree aberto e uma estrutura de no a ser
+    // escrita em memoria secundaria.
+    // Pos: Escreve a estrutura de registro em memoria secundaria.
     tree.seekp(++size * sizeof(node));
     tree.write((const char *)(&newNode), sizeof(node));
 }
 
+// ----------------------------------------------------------------
 void TreeFile::writeNode(node newNode, int pos) {
+    // Pre: arquivo binario tree aberto, uma estrutura de no a ser
+    // escrita em memoria secundaria e o index da estrutura.
+    // Pos: Escreve a estrutura de registro em memoria secundaria na
+    // posicao indicada.
     tree.seekp(pos * sizeof(node));
     tree.write((const char*)(&newNode), sizeof(node));
 }
@@ -102,7 +111,8 @@ void TreeFile::printNode(node node) {
     for (int j = 1; j <= node.n; j++) {
         cout << "(" 
              << setw(3) << node.K[j] << ", "
-             << setw(3) << node.A[j] << ")";
+             << setw(3) << node.A[j] << ","
+             << setw(3) << node.B[j] << ")";
     }
     cout << endl;
 }
@@ -112,12 +122,12 @@ void TreeFile::printTree() {
     // Pre: arquivo binario tree aberto.
     // Pos: imprime na tela a arvore completa, inclusive sua raiz e
     // o valor de m com uma formatacao amigavel.
-    cout << "ARVORE B" << endl;
+    cout << "B-TREE" << endl;
     cout << "T = " << root << ", m = " << m << endl;
-    cout << string(66, '-') << endl;
+    cout << string(100, '-') << endl;
     cout << left << setw(6) << "No" 
-         << "n,A[0],(K[1],A[1]),...,(K[n],A[n])" << endl;
-    cout << string(66, '-') << endl;
+         << "n,A[0],(K[1],A[1],B[1]),...,(K[n],A[n], B[n])" << endl;
+    cout << string(100, '-') << endl;
 
     tree.seekg(1 * sizeof(node));
     for (int i = 1; i <= size; i++) {
@@ -126,81 +136,38 @@ void TreeFile::printTree() {
     }
     tree.seekg(1 * sizeof(node));
 
-    cout << string(66, '-') << endl;
+    cout << string(100, '-') << endl;
+}
+
+// ----------------------------------------------------------------
+int TreeFile::getM() {
+    // Pre: classe inicializada.
+    // Pos: retorna o valor correspondente ao m da arvore.
+    return m;
 }
 
 // ----------------------------------------------------------------
 void TreeFile::createTree() {
-    // Pre: existencia de um arquivo txt como modelo de criacao nos
-    // seguintes moldes: 
-    /*
-        <raiz>
-        <n> <A0> <K1> <A1> ... <Kn> <An>
-        ...
-        <n> <A0> <K1> <A1> ... <Kn> <An>
-    */
-    // Pos: traduz o arquivo txt com o nome inserido pelo usuario em
-    // um arquivo binario e o abre para a utilizacao do programa.
-    string fileName;
-    cout << "Arquivo mvias.bin nao existe ainda, criando..." << endl;
-    cout << "Entre com o nome do arquivo de texto a ser lido (default: mvias.txt): ";
-    cin >> fileName;
-
-    // processo de abertura do arquivo de texto com o nome fornecido 
-    // pelo usuario em modo de leitura:
-    ifstream txtFile;
-    txtFile.open(string("../" + fileName), ios::in);
-    if (!txtFile.is_open()){
-        txtFile.open(string("../" + fileName + ".txt"), ios::in);
-        if (!txtFile.is_open()){
-            txtFile.open("../mvias.txt", ios::in);
-            if (!txtFile.is_open()){
-                cout << "Erro: arquivo de texto nao pode ser aberto (provavel erro de armazenamento)." << endl;
-                abort();
-            } else {
-                cout << "Nome fornecido invalido ou arquivo não encontrado, lendo mvias.txt..." << endl;
-            }
-        } else {
-            cout << "Lendo " << fileName << ".txt..." << endl;
-        }
-    } else {
-        cout << "Lendo " << fileName << "..." << endl;
-    }
-
-    // processo de abertura do arquivo binario em modo de escrita:
+    // Pre: nenhuma.
+    // Pos: cria um arquivo de arvore de m-vias vazio.
     ofstream treeCreation("../files/mvias.bin", ios::out | ios::binary);
     if(!treeCreation.is_open()){
-        cerr << "Erro: arquivo mvias.bin nao pode ser aberto (provavel erro de armazenamento)." << endl;
+        cerr << "Error: mvias.bin file cannot be open (possible memory error)." << endl;
         abort();
     }
-
-    // escrita no arquivo binario
     node p;
-    size = 0;
-    treeCreation.seekp(1 * sizeof(node));
-
-    txtFile >> root;
-    txtFile >> p.n;
-    while(! txtFile.eof()) {
-        txtFile >> p.A[0];
-        for(int i = 1; i <= p.n; i++) {
-            txtFile >> p.K[i] >> p.A[i];
-        }
-        treeCreation.write((const char *)(&p),sizeof(node));
-        size++;
-        txtFile >> p.n;
-    }
-    txtFile.close();
-
-    p.n = size;
-    p.A[0] = root;
+    p.n = 0;
+    p.A[0] = 1;
     treeCreation.seekp(0);
+    treeCreation.write((const char *)(&p),sizeof(node));
+    p.A[0] = 0;
+    p.K[0] = 0;
     treeCreation.write((const char *)(&p),sizeof(node));
     treeCreation.close();
 
     tree.open("../files/mvias.bin", ios::in | ios::out | ios::binary);
 
-    cout << "Arquivo binario criado com sucesso! Continuando o programa..." << endl << endl;
+    cout << "Binary file created with success! Continuing the execution..." << endl << endl;
 }
 
 // ----------------------------------------------------------------
@@ -218,12 +185,18 @@ int TreeFile::getIndexRoot() {
     return root;
 }
 
+// ----------------------------------------------------------------
 void TreeFile::setIndexRoot(int pos) {
+    // Pre: classe inicializada.
+    // Pos: muda a variavel interna da posicao da raiz.
     root = pos;
 }
 
 // ----------------------------------------------------------------
 void TreeFile::writeMetaInfo() {
+    // Pre: classe inicializada.
+    // Pos: salva as meta informacoes da arvore em memoria secundaria
+    // (tamanho e posicao da raiz).
     node p;
     p.n = size;
     p.A[0] = root;
