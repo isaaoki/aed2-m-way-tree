@@ -112,6 +112,7 @@ void TreeFile::printTree() {
     // Pre: arquivo binario tree aberto.
     // Pos: imprime na tela a arvore completa, inclusive sua raiz e
     // o valor de m com uma formatacao amigavel.
+    cout << "ARVORE B" << endl;
     cout << "T = " << root << ", m = " << m << endl;
     cout << string(66, '-') << endl;
     cout << left << setw(6) << "No" 
