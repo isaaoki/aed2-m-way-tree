@@ -6,7 +6,9 @@
 using namespace std;
 
 #include "../include/TreeFile.h"
+#include "TreeFile.cpp"
 #include "../include/Index.h"
+#include "Index.cpp"
 
 void printMenu() {
     cout << "MENU PRINCIPAL" << endl;

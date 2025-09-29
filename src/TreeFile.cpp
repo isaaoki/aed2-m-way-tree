@@ -91,7 +91,7 @@ void TreeFile::writeNode(node newNode) {
 void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
-    // Pos: imprime na tela o do dado com uma formatacao amigavel.
+    // Pos: imprime na tela o no dado com uma formatacao amigavel.
     cout << node.n << ","
          << right << setw(3) << node.A[0] << ",";
     for (int j = 1; j <= node.n; j++) {
