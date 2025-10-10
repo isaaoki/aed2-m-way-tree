@@ -139,6 +139,7 @@ void DataFile::createFile() {
     dataCreation.write((const char *)(&r),sizeof(registry));
     dataCreation.close();
 
+    size = 0;
     data.open("../files/data.bin", ios::in | ios::out | ios::binary);
 
     cout << "Binary file created with success! Continuing the execution..." << endl << endl;

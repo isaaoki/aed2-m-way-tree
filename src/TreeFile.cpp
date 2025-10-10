@@ -99,6 +99,8 @@ void TreeFile::writeNode(node newNode, int pos) {
     // posicao indicada.
     tree.seekp(pos * sizeof(node));
     tree.write((const char*)(&newNode), sizeof(node));
+
+    if (pos > size) size = pos;
 }
 
 // ----------------------------------------------------------------
@@ -124,6 +126,7 @@ void TreeFile::printTree() {
     // o valor de m com uma formatacao amigavel.
     cout << "B-TREE" << endl;
     cout << "T = " << root << ", m = " << m << endl;
+    cout << "Number of nodes = " << size << endl;
     cout << string(100, '-') << endl;
     cout << left << setw(6) << "No" 
          << "n,A[0],(K[1],A[1],B[1]),...,(K[n],A[n], B[n])" << endl;
@@ -165,6 +168,8 @@ void TreeFile::createTree() {
     treeCreation.write((const char *)(&p),sizeof(node));
     treeCreation.close();
 
+    size = 0;
+    root = 1;
     tree.open("../files/mvias.bin", ios::in | ios::out | ios::binary);
 
     cout << "Binary file created with success! Continuing the execution..." << endl << endl;
