@@ -77,7 +77,7 @@ TreeFile::node TreeFile::getNthNode(int n) {
     if(! tree.eof()) { // tratamento de erro no qual tenta-se ler um no depois do final do arquivo
         return p;
     } else {
-        cout << "Erro: tentativa de acessar no inexistente."<< endl;
+        cout << "Error: inexistent node being accessed."<< endl;
         abort();
     }
 }
@@ -125,12 +125,12 @@ void TreeFile::printTree() {
     // Pos: imprime na tela a arvore completa, inclusive sua raiz e
     // o valor de m com uma formatacao amigavel.
     cout << "B-TREE" << endl;
-    cout << "T = " << root << ", m = " << m << endl;
+    cout << "T (root) = " << root << ", m = " << m << endl;
     cout << "Number of nodes = " << size << endl;
-    cout << string(100, '-') << endl;
+    cout << string(110, '-') << endl;
     cout << left << setw(6) << "No" 
          << "n,A[0],(K[1],A[1],B[1]),...,(K[n],A[n], B[n])" << endl;
-    cout << string(100, '-') << endl;
+    cout << string(110, '-') << endl;
 
     tree.seekg(1 * sizeof(node));
     for (int i = 1; i <= size; i++) {
@@ -139,7 +139,7 @@ void TreeFile::printTree() {
     }
     tree.seekg(1 * sizeof(node));
 
-    cout << string(100, '-') << endl;
+    cout << string(110, '-') << endl;
 }
 
 // ----------------------------------------------------------------
@@ -172,7 +172,7 @@ void TreeFile::createTree() {
     root = 1;
     tree.open("../files/mvias.bin", ios::in | ios::out | ios::binary);
 
-    cout << "Binary file created with success! Continuing the execution..." << endl << endl;
+    cout << "Binary tree file created with success! Continuing the execution..." << endl << endl;
 }
 
 // ----------------------------------------------------------------

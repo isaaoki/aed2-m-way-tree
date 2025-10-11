@@ -45,11 +45,11 @@ int main() {
                 break;
             case 3:
                 cout << "SEARCH CELESTIAL BODY BY MASS" << endl;
-                cout << "Enter mass: ";
+                cout << "Enter mass (10^15 Kg): ";
                 cin >> r.mass;
                 searchResult = index.mSearch(r.mass);
                 
-                cout << "\nmSearch result: ";
+                cout << endl << "mSearch result: ";
                 cout << setw(4) << r.mass << " ("
                      << get<1>(searchResult.visitedNodes.top()) << "," 
                      << searchResult.i.top() << ","
@@ -57,37 +57,37 @@ int main() {
                 cout << "READ ACCESS: " << searchResult.read << endl;
 
                 if (searchResult.found) {
-                    cout << string(100, '-') << endl;
+                    cout << string(110, '-') << endl;
                     cout << left 
-                    << setw(18) << "Mass (10^15 Kg)" 
-                    << setw(24) << "Name"
-                    << setw(12) << "Radius (km)"
-                    << setw(28) << "Distance from Sun (10^6 Km)"
+                    << setw(17) << "Mass (10^15 Kg)" 
+                    << setw(26) << "Name"
+                    << setw(13) << "Radius (km)"
+                    << setw(29) << "Distance from Sun (10^6 Km)"
                     << setw(12) << "Satellites"
-                    << setw(8) << "isMoon?" << endl;
+                    << setw(9) << "isMoon?" << endl;
 
                     data.printRegistry(data.getNthRegistry(searchResult.b));
 
-                    cout << string(100, '-') << endl;
+                    cout << string(110, '-') << endl;
                 } else {
-                    cout << "Result not found!" << endl;
+                    cout << "Error: result not found." << endl;
                 }
                 
                 break;
             case 4:
                 cout << "INSERT CELESTIAL BODY" << endl;
-                cout << "Enter whith the planet's data: " << endl;
-                cout << "\nMass (10^15 Kg): ";
+                cout << "Enter with the planet's data: " << endl;
+                cout << "- Mass (10^15 Kg): ";
                 cin >> r.mass;
-                cout << "Name (max: 24): ";
+                cout << "- Name (max: 24): ";
                 cin >> r.name;
-                cout << "Radius (Km): ";
+                cout << "- Radius (Km): ";
                 cin >> r.radius;
-                cout << "Distance from Sun (10^6 Km): ";
+                cout << "- Distance from Sun (10^6 Km): ";
                 cin >> r.distanceFromSun;
-                cout << "Number Sattelites: ";
+                cout << "- Number of Sattelites: ";
                 cin >> r.satellites;
-                cout << "Is moon (T or F)? ";
+                cout << "- Is moon (T or F)? ";
                 cin >> moon;
 
                 if (moon == 't' || moon == 'T') r.isMoon = true;
@@ -95,7 +95,7 @@ int main() {
 
                 access = index.insertB(&r);
 
-                cout << "\nREAD ACCESS: " << get<0>(access) << endl;
+                cout << endl << "READ ACCESS: " << get<0>(access) << endl;
                 cout << "WRITE ACCESS: " << get<1>(access) << endl;
                 break;
             case 5: 

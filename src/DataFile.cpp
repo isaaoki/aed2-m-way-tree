@@ -88,12 +88,12 @@ void DataFile::printRegistry(registry registry) {
     // arquivo aberto e e um metodo estatico.
     // Pos: imprime na tela o registro dado com uma formatacao amigavel.
     cout << left << fixed << setprecision(2)
-         << setw(18) << registry.mass 
-         << setw(24) << registry.name 
-         << setw(12) << registry.radius
-         << setw(27) << registry.distanceFromSun
+         << setw(17) << registry.mass 
+         << setw(26) << registry.name 
+         << setw(13) << registry.radius
+         << setw(29) << registry.distanceFromSun
          << setw(12) << registry.satellites
-         << setw(8) << (registry.isMoon ? "YES" : "NO") << endl;
+         << setw(9) << (registry.isMoon ? "YES" : "NO") << endl;
 }
 
 // ----------------------------------------------------------------
@@ -103,17 +103,17 @@ void DataFile::printFile() {
     // seu tamanho com uma formatacao amigavel.
     cout << "CELESTIAL BODIES" << endl;
     cout << "Number of registries = " << size << endl;
-    cout << string(100, '-') << endl;
+    cout << string(110, '-') << endl;
 
     cout << left 
-         << setw(18) << "Mass (10^15 Kg)" 
-         << setw(24) << "Name"
-         << setw(12) << "Radius (km)"
-         << setw(28) << "Distance from Sun (10^6 Km)"
+         << setw(17) << "Mass (10^15 Kg)" 
+         << setw(26) << "Name"
+         << setw(13) << "Radius (km)"
+         << setw(29) << "Distance from Sun (10^6 Km)"
          << setw(12) << "Satellites"
-         << setw(8) << "isMoon?" << endl;
+         << setw(9) << "isMoon?" << endl;
 
-    cout << string(100, '-') << endl;
+    cout << string(110, '-') << endl;
 
     data.seekg(1 * sizeof(registry));
     for (int i = 1; i <= size; i++) {
@@ -121,7 +121,7 @@ void DataFile::printFile() {
     }
     data.seekg(1 * sizeof(registry));
 
-    cout << string(100, '-') << endl;
+    cout << string(110, '-') << endl;
 }
 
 // ----------------------------------------------------------------
@@ -142,7 +142,7 @@ void DataFile::createFile() {
     size = 0;
     data.open("../files/data.bin", ios::in | ios::out | ios::binary);
 
-    cout << "Binary file created with success! Continuing the execution..." << endl << endl;
+    cout << "Binary data file created with success! Continuing the execution..." << endl << endl;
 }
 
 // ----------------------------------------------------------------
