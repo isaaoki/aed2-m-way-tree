@@ -23,7 +23,7 @@ void printMenu() {
 int main() {
     TreeFile t;
     DataFile data;
-    Index index(&t);
+    Index index(&t, &data);
     Index::mSearchResult searchResult;
     bool isRunning = true;
     DataFile::registry r;
@@ -93,8 +93,7 @@ int main() {
                 if (moon == 't' || moon == 'T') r.isMoon = true;
                 else r.isMoon = false;                
 
-                B = data.writeRegistry(r);
-                access = index.insertB(r.mass, B);
+                access = index.insertB(&r);
 
                 cout << "\nREAD ACCESS: " << get<0>(access) << endl;
                 cout << "WRITE ACCESS: " << get<1>(access) << endl;

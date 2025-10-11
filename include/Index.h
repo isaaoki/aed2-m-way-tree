@@ -8,10 +8,11 @@ using namespace std;
 #define INDEX_H
 
 #include "../include/TreeFile.h"
+#include "../include/DataFile.h"
 
 class Index {
     public:
-        Index(TreeFile* t);
+        Index(TreeFile* t, DataFile* data);
         ~Index();
 
         struct mSearchResult {
@@ -23,14 +24,15 @@ class Index {
         };
 
         mSearchResult mSearch(double x);
-        tuple<int, int> insertB(double x, int b);
+        tuple<int, int> insertB(DataFile::registry* newRegistry);
                 
     private:
         TreeFile* treeFile;
+        DataFile* dataFile;
         
         int linearSearch(vector<double> &K, double x, int n);
         mSearchResult mSearch(TreeFile* treeFile, double x);
-        tuple<int, int> insertB(TreeFile* treeFile, double x, int b);
+        tuple<int, int> insertB(DataFile::registry* newRegistry, TreeFile* treeFile, DataFile* dataFile);
 
 };
 

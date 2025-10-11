@@ -13,11 +13,12 @@ using namespace std;
 #include "../include/Index.h"
 
 // ----------------------------------------------------------------
-Index::Index(TreeFile* t) {
+Index::Index(TreeFile* t, DataFile* data) {
     // Pre: um ponteiro para uma classe TreeFile inicializada (objeto).
     // Pos: armazena numa variavel interna um ponteiro para o objeto
     // dado, para uso interno da classe.
     treeFile = t;
+    dataFile = data;
 }
 
 // ----------------------------------------------------------------
@@ -34,10 +35,10 @@ Index::mSearchResult Index::mSearch(double x) { // versao publica
 }
 
 // ----------------------------------------------------------------
-tuple<int, int> Index::insertB(double x, int b) { // versao publica
+tuple<int, int> Index::insertB(DataFile::registry* newRegistry) { // versao publica
     // Pre: classe inicializada.
     // Pos: tenta inserir um valor x no index
-    return insertB(treeFile, x, b);
+    return insertB(newRegistry, treeFile, dataFile);
 }
 
 // ----------------------------------------------------------------
@@ -99,20 +100,20 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, double x) { // versao pr
 }
 
 // ----------------------------------------------------------------
-tuple<int, int> Index::insertB(TreeFile* treeFile, double x, int b) { // versao privada
+tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFile, DataFile* dataFile) { // versao privada
     // Pre: classe inicializada.
     // Pos: tenta localizar e inserir um valor no index.
 
     // (K, A) e o par a ser inserido
-    double K = x; 
+    double K = newRegistry->mass;
     int A = 0;
-    int B = b;
+    int B;
     TreeFile::node nodeP, nodeQ;
     int pos, index;
     tuple<int, int> accessNumber;
     int write = 0;
 
-    mSearchResult searchResult = mSearch(treeFile, x);    
+    mSearchResult searchResult = mSearch(treeFile, newRegistry->mass);    
 
     // x ja esta em T
     if (searchResult.found) {
@@ -120,6 +121,8 @@ tuple<int, int> Index::insertB(TreeFile* treeFile, double x, int b) { // versao 
         accessNumber = make_tuple(searchResult.read, write);
         return accessNumber;
     }
+
+    B = dataFile->writeRegistry(*newRegistry);
 
     while (!searchResult.visitedNodes.empty()) {
         // Usa ultimo no empilhado
