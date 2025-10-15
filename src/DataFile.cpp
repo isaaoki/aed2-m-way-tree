@@ -83,6 +83,19 @@ int DataFile::writeRegistry(registry newRegistry) {
 }
 
 // ----------------------------------------------------------------
+int DataFile::removeRegistry(int pos) {
+    // Pre: arquivo binario data aberto e a posicao do registro a
+    // ser marcado como removido.
+    // Pos: marca o registro como removido e decrementa o tamanho da 
+    // arvore.
+    registry emptyRegistry;
+    emptyRegistry.mass = 0;
+    data.seekp(pos * sizeof(registry));
+    data.write((const char*)(&emptyRegistry), sizeof(registry));
+    return --size;
+}
+
+// ----------------------------------------------------------------
 void DataFile::printRegistry(registry registry) {
     // Pre: uma estrutura de registro a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.

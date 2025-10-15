@@ -22,6 +22,7 @@ class TreeFile {
         node getNthNode(int n);
         void writeNode(node newNode);
         void writeNode(node newNode, int pos);
+        void removeNode(int pos);
         static void printNode(node node);
         void printTree();
         int getM();

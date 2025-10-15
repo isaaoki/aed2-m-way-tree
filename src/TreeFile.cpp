@@ -104,6 +104,18 @@ void TreeFile::writeNode(node newNode, int pos) {
 }
 
 // ----------------------------------------------------------------
+void TreeFile::removeNode(int pos) {
+    // Pre: arquivo binario tree aberto e a posicao do no a ser
+    // marcado como removido.
+    // Pos: marca o no como removido e decrementa o tamanho da arvore.
+    node emptyNode;
+    emptyNode.n = 0;
+    tree.seekp(pos * sizeof(node));
+    tree.write((const char*)(&emptyNode), sizeof(node));
+    size--;
+}
+
+// ----------------------------------------------------------------
 void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
