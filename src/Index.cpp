@@ -85,7 +85,6 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao priva
         if (x == K[i]) {
             result.found = true;
             result.i.push(i);
-            result.b = node.B[i];
             return result;
         } else {            
             i--;

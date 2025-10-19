@@ -16,11 +16,10 @@ class Index {
         ~Index();
 
         struct mSearchResult {
-            stack<tuple<TreeFile::node, int>> visitedNodes; // Nos percorridos e posicao
+            stack<tuple<TreeFile::node, int>> visitedNodes; // Nós percorridos e posicao na árvore
             stack<int> i; // Ai dos nos percorridos
-            int b;
-            bool found;
-            int read = 0;
+            bool found;  
+            int read = 0; // Numero de leituras
         };
 
         mSearchResult mSearch(int x);
