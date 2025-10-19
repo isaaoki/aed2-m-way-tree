@@ -27,7 +27,7 @@ Index::~Index() {
 }
 
 // ----------------------------------------------------------------
-Index::mSearchResult Index::mSearch(double x) { // versao publica
+Index::mSearchResult Index::mSearch(int x) { // versao publica
     // Pre: classe inicializada.
     // Pos: tenta localizar um valor no index e retorna sua localizacao
     // caso o encontre no formato: (pos, i, found).
@@ -42,7 +42,7 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry) { // versao publ
 }
 
 // ----------------------------------------------------------------
-int Index::linearSearch(vector<double> &K, double x, int n) {
+int Index::linearSearch(vector<int> &K, int x, int n) {
     // Pre: vetor de valores de um no, o valor a ser procurado e o 
     // numero de valores num vetor.
     // Pos: retorna a posicao do valor a ser procurado no vetor dado
@@ -55,7 +55,7 @@ int Index::linearSearch(vector<double> &K, double x, int n) {
 }
 
 // ----------------------------------------------------------------
-Index::mSearchResult Index::mSearch(TreeFile* treeFile, double x) { // versao privada
+Index::mSearchResult Index::mSearch(TreeFile* treeFile, int x) { // versao privada
     // Pre: classe inicializada.
     // Pos: tenta localizar um valor no index e retorna sua localizacao
     // caso o encontre no formato: (pos, i, found).
@@ -74,7 +74,7 @@ Index::mSearchResult Index::mSearch(TreeFile* treeFile, double x) { // versao pr
         result.read++;
 
         // Ajuste do array para incluir MIN_VALUE e MAX_VALUE
-        vector<double> K(node.n + 2); 
+        vector<int> K(node.n + 2); 
         K[0] = INT_MIN;
         for (int j = 1; j <= node.n; j++) K[j] = node.K[j];
         K[node.n + 1] = INT_MAX;
@@ -105,7 +105,7 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
     // Pos: tenta localizar e inserir um valor no index.
 
     // (K, A) e o par a ser inserido
-    double K = newRegistry->mass;
+    int K = newRegistry->mass;
     int A = 0;
     int B;
     TreeFile::node nodeP, nodeQ;
@@ -156,7 +156,7 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
         } 
 
         // Definindo no P e Q com vetores temporarios
-        double tempK[treeFile->getM() + 1];
+        int tempK[treeFile->getM() + 1];
         int tempA[treeFile->getM() + 1];
         int tempB[treeFile->getM() + 1];
         tempA[0] = nodeP.A[0];

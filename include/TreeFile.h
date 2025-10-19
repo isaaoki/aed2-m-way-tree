@@ -13,7 +13,7 @@ class TreeFile {
         struct node {
             int n;
             int A[m];
-            double K[m];
+            int K[m];
             int B[m];
         };
 
@@ -32,7 +32,6 @@ class TreeFile {
 
     private:
         fstream tree;
-        int nodeSize;
         int size; // total de nos
         int root;
         void writeMetaInfo();

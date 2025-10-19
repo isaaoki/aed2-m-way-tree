@@ -10,7 +10,7 @@ class DataFile {
         ~DataFile();
 
         struct registry { // celestialBody
-            double mass; // in TeraTons or 10^15 Kg
+            int mass; // in TeraTons or 10^15 Kg
             char name[25];
             float radius; // in Km
             double distanceFromSun; // in GigaMeters or 10^6 Km
