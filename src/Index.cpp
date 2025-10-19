@@ -231,9 +231,10 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
 
 // ----------------------------------------------------------------
 tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
-    TreeFile::node nodeP, nodeQ;
+    TreeFile::node nodeP, nodeQ, nodeR, nodeS;
     tuple<int, int> accessNumber;
     int pos, index, write = 0;
+    int posQ, posR, indexR;
 
     mSearchResult searchResult = mSearch(treeFile, x);
 
@@ -247,6 +248,8 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
     nodeP = get<0>(searchResult.visitedNodes.top());
     pos = get<1>(searchResult.visitedNodes.top());
     index = searchResult.i.top();
+    searchResult.visitedNodes.pop();
+    searchResult.i.pop();
 
     // registro removido do datafile
     dataFile->removeRegistry(nodeP.B[index]); // esboço: n esta funcionando
@@ -257,11 +260,13 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
         nodeQ = treeFile->getNthNode(nodeP.A[index]); // ir para subarvore direita
 
         while (nodeQ.A[0] != 0) { // q não é folha
+            // Adicionar leituras...
             nodeQ = treeFile->getNthNode(nodeP.A[0]);
         }
 
         // Substituir Ki por Kqi e escrever no disco
         nodeP.K[index] = nodeQ.K[1];
+        nodeP.B[index] = nodeQ.B[1];
         treeFile->writeNode(nodeP, pos);
         write++;
         
@@ -276,6 +281,83 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
         nodeP.A[i] = nodeP.A[i + 1];
         nodeP.B[i] = nodeP.B[i + 1];
     }
+
+    // fragmentar nó (nao possui chaves suficientes e nao é raiz)
+    while (nodeP.n < (int)ceil(treeFile->getM()/2.0) - 1 && pos != treeFile->getIndexRoot()) {
+        // Pegar nó pai de p = nó R
+        nodeR = get<0>(searchResult.visitedNodes.top());
+        posR = get<1>(searchResult.visitedNodes.top());
+        indexR = searchResult.i.top();
+        searchResult.visitedNodes.pop();
+        searchResult.i.pop();
+
+        // p tem irmao direito q mais proximo = nó Q
+        if (indexR + 1 <= nodeR.n) {
+            // Adicionar leituras...
+            posQ = nodeR.A[indexR + 1];
+            nodeQ = treeFile->getNthNode(posQ);
+            int j = indexR + 1;
+
+            if (nodeQ.n >= (int)ceil(treeFile->getM()/2.0)) { 
+                // nó Q pode emprestar, redistribuir chaves
+                nodeP.n++;
+                nodeP.K[nodeP.n] = nodeR.K[j];
+                nodeP.A[nodeP.n] = nodeQ.A[0];
+                nodeP.B[nodeP.n] = nodeR.B[j];
+
+                nodeR.K[j] = nodeQ.K[1];
+                nodeR.B[j] = nodeQ.B[1];
+
+                nodeQ.n--;
+                nodeQ.A[0] = nodeQ.A[1];
+                for (int i = 1; i <= nodeQ.n; i++) {
+                    nodeQ.K[i] = nodeQ.K[i + 1];
+                    nodeQ.A[i] = nodeQ.A[i + 1];
+                    nodeQ.B[i] = nodeQ.B[i + 1];
+                }
+
+                treeFile->writeNode(nodeP, pos);
+                treeFile->writeNode(nodeQ, posQ);
+                treeFile->writeNode(nodeR, posR);
+                write += 3;
+
+                accessNumber = make_tuple(searchResult.read, write);
+                return accessNumber;
+            }
+            // combinar p, Krj e y
+            nodeS.n = 2 * (int)ceil(treeFile->getM()/2.0);
+            nodeS.A[0] = nodeP.A[0];
+
+            for (int i = 1; i <= nodeP.n; i++) {
+                nodeS.K[i] = nodeP.K[i];
+                nodeS.A[i] = nodeP.A[i];
+                nodeS.B[i] = nodeP.B[i];
+            }
+
+            nodeS.K[nodeP.n + 1] = nodeR.K[j];
+            nodeS.A[nodeP.n + 1] = nodeQ.A[0];
+            nodeS.B[nodeP.n + 1] = nodeR.B[j];
+
+            for (int i = 1; i <= nodeQ.n; i++) {
+                nodeS.K[i] = nodeQ.K[i];
+                nodeS.A[i] = nodeQ.A[i];
+                nodeS.B[i] = nodeQ.B[i];
+            }
+
+            // retirar Krj de nó R
+            nodeR.n--;
+            for (int i = j; i <= nodeR.n; i++) {
+                nodeR.K[i] = nodeR.K[i + 1];
+                nodeR.A[i] = nodeR.A[i + 1];
+                nodeR.B[i] = nodeR.B[i + 1];
+            }
+
+            nodeP = nodeR;
+            pos = posR; // conferir isso 
+            index = indexR;
+        }
+        // fazer caso do irmão esquerdo
+    } 
 
    // escrita para disco
     if (nodeP.n != 0) {
