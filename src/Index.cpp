@@ -42,6 +42,11 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry) { // versao publ
 }
 
 // ----------------------------------------------------------------
+tuple<int, int> Index::deleteB(int x) {
+    return deleteB(treeFile, dataFile, x);
+}
+
+// ----------------------------------------------------------------
 int Index::linearSearch(vector<int> &K, int x, int n) {
     // Pre: vetor de valores de um no, o valor a ser procurado e o 
     // numero de valores num vetor.
@@ -179,7 +184,7 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
             tempB[i + 1] = nodeP.B[i];
         }
         
-        int half = (int)ceil((treeFile->getM())/2.0);
+        int half = (int)ceil(treeFile->getM()/2.0);
 
         // Cria no Q e P
         nodeQ.n = treeFile->getM() - half;
@@ -219,6 +224,66 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
     // Atualizar raiz e escrever raiz no disco
     treeFile->writeNode(nodeRoot);
     treeFile->setIndexRoot(treeFile->getSize());
+
+    accessNumber = make_tuple(searchResult.read, write);
+    return accessNumber;
+}
+
+// ----------------------------------------------------------------
+tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
+    TreeFile::node nodeP, nodeQ;
+    tuple<int, int> accessNumber;
+    int pos, index, write = 0;
+
+    mSearchResult searchResult = mSearch(treeFile, x);
+
+    // x nao esta em T
+    if (!searchResult.found) {
+        cout << "Error: value doesnt exist." << endl;
+        accessNumber = make_tuple(searchResult.read, write);
+        return accessNumber;
+    }    
+
+    nodeP = get<0>(searchResult.visitedNodes.top());
+    pos = get<1>(searchResult.visitedNodes.top());
+    index = searchResult.i.top();
+
+    // registro removido do datafile
+    dataFile->removeRegistry(nodeP.B[index]); // esboço: n esta funcionando
+    
+    // nó é não-folha? 
+    if (nodeP.A[0] != 0) {
+        // encontra chave para mover para folha
+        nodeQ = treeFile->getNthNode(nodeP.A[index]); // ir para subarvore direita
+
+        while (nodeQ.A[0] != 0) { // q não é folha
+            nodeQ = treeFile->getNthNode(nodeP.A[0]);
+        }
+
+        // Substituir Ki por Kqi e escrever no disco
+        nodeP.K[index] = nodeQ.K[1];
+        treeFile->writeNode(nodeP, pos);
+        write++;
+        
+        nodeP = nodeQ;
+        index = 1;
+    }
+    
+    // remover (Ki, Ai, Bi) de p
+    nodeP.n--;
+    for (int i = pos; i <= nodeP.n; i++) {
+        nodeP.K[i] = nodeP.K[i + 1];
+        nodeP.A[i] = nodeP.A[i + 1];
+        nodeP.B[i] = nodeP.B[i + 1];
+    }
+
+   // escrita para disco
+    if (nodeP.n != 0) {
+        treeFile->writeNode(nodeP, pos);
+        write++;
+    } else {
+        treeFile->setIndexRoot(nodeP.A[0]); // checar isso???
+    }
 
     accessNumber = make_tuple(searchResult.read, write);
     return accessNumber;

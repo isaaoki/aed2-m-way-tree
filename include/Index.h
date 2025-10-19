@@ -24,7 +24,8 @@ class Index {
 
         mSearchResult mSearch(int x);
         tuple<int, int> insertB(DataFile::registry* newRegistry);
-                
+        tuple<int, int> deleteB(int x);
+
     private:
         TreeFile* treeFile;
         DataFile* dataFile;
@@ -32,6 +33,7 @@ class Index {
         int linearSearch(vector<int> &K, int x, int n);
         mSearchResult mSearch(TreeFile* treeFile, int x);
         tuple<int, int> insertB(DataFile::registry* newRegistry, TreeFile* treeFile, DataFile* dataFile);
+        tuple<int, int> deleteB(TreeFile* treeFile, DataFile* dataFile, int x);
 
 };
 

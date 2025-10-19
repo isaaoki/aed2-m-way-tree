@@ -102,10 +102,14 @@ int main() {
                 cout << "WRITE ACCESS: " << get<1>(access) << endl;
                 break;
             case 5: 
-                cout << "SEARCH CELESTIAL BODY BY MASS" << endl;
+                cout << "REMOVE CELESTIAL BODY BY MASS" << endl;
                 cout << "Enter mass (10^15 Kg): ";
                 cin >> r.mass;
                 
+                access = index.deleteB(r.mass);
+
+                cout << endl << "READ ACCESS: " << get<0>(access) << endl;
+                cout << "WRITE ACCESS: " << get<1>(access) << endl;
                 break;
             case 6: 
                 isRunning = false;
