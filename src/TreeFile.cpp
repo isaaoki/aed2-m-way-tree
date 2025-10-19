@@ -23,6 +23,7 @@ TreeFile::TreeFile(){
         tree.read((char *)(&p), sizeof(node));
         size = p.n;
         root = p.A[0];
+        freeNodes = getFreeNodes(p.A[1]);
         tree.seekg(1 * sizeof(node));
     }
 
@@ -87,7 +88,13 @@ void TreeFile::writeNode(node newNode) {
     // Pre: arquivo binario tree aberto e uma estrutura de no a ser
     // escrita em memoria secundaria.
     // Pos: Escreve a estrutura de registro em memoria secundaria.
-    tree.seekp(++size * sizeof(node));
+    size++;
+    if(freeNodes.empty()){
+        tree.seekp(size * sizeof(node));
+    } else {
+        tree.seekp(freeNodes.back() * sizeof(node));
+        freeNodes.pop_back();
+    }
     tree.write((const char *)(&newNode), sizeof(node));
 }
 
@@ -109,9 +116,12 @@ void TreeFile::removeNode(int pos) {
     // marcado como removido.
     // Pos: marca o no como removido e decrementa o tamanho da arvore.
     node emptyNode;
-    emptyNode.n = 0;
-    tree.seekp(pos * sizeof(node));
-    tree.write((const char*)(&emptyNode), sizeof(node));
+    emptyNode.A[1] = pos;
+    if(!freeNodes.empty()) {
+        tree.seekp(freeNodes.back() * sizeof(node));
+        tree.write((const char*)(&emptyNode), sizeof(node));
+    }
+    freeNodes.push_back(pos);
     size--;
 }
 
@@ -209,6 +219,18 @@ void TreeFile::setIndexRoot(int pos) {
     root = pos;
 }
 
+vector<int> TreeFile::getFreeNodes(int freeNode) {
+    vector<int> result;
+    int currFreeNode = freeNode;
+
+    while(currFreeNode != 0) {
+        result.push_back(currFreeNode);
+        currFreeNode = getNthNode(currFreeNode).A[1];
+    }
+    
+    return result;
+}
+
 // ----------------------------------------------------------------
 void TreeFile::writeMetaInfo() {
     // Pre: classe inicializada.
@@ -217,6 +239,11 @@ void TreeFile::writeMetaInfo() {
     node p;
     p.n = size;
     p.A[0] = root;
+    if(freeNodes.empty()) {
+        p.A[1] = 0;
+    } else {
+        p.A[1] = freeNodes.front();
+    }
     tree.seekp(0);
     tree.write((const char *)(&p),sizeof(node));
 }
