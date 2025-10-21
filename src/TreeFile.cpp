@@ -92,8 +92,8 @@ void TreeFile::writeNode(node newNode) {
     if(freeNodes.empty()){
         tree.seekp(size * sizeof(node));
     } else {
-        tree.seekp(freeNodes.back() * sizeof(node));
-        freeNodes.pop_back();
+        tree.seekp(freeNodes.top() * sizeof(node));
+        freeNodes.pop();
     }
     tree.write((const char *)(&newNode), sizeof(node));
 }
@@ -118,10 +118,10 @@ void TreeFile::removeNode(int pos) {
     node emptyNode;
     emptyNode.A[1] = pos;
     if(!freeNodes.empty()) {
-        tree.seekp(freeNodes.back() * sizeof(node));
+        tree.seekp(freeNodes.top() * sizeof(node));
         tree.write((const char*)(&emptyNode), sizeof(node));
     }
-    freeNodes.push_back(pos);
+    freeNodes.push(pos);
     size--;
 }
 
@@ -180,14 +180,15 @@ void TreeFile::createTree() {
         cerr << "Error: mvias.bin file cannot be open (possible memory error)." << endl;
         abort();
     }
-    node p;
-    p.n = 0;
-    p.A[0] = 1;
+    node zero;
+    node firstNode;
+    zero.n = 0;
+    zero.A[0] = 1;
     treeCreation.seekp(0);
-    treeCreation.write((const char *)(&p),sizeof(node));
-    p.A[0] = 0;
-    p.K[0] = 0;
-    treeCreation.write((const char *)(&p),sizeof(node));
+    treeCreation.write((const char *)(&zero),sizeof(node));
+    firstNode.A[0] = 0;
+    firstNode.K[0] = 0;
+    treeCreation.write((const char *)(&firstNode),sizeof(node));
     treeCreation.close();
 
     size = 0;
@@ -219,12 +220,16 @@ void TreeFile::setIndexRoot(int pos) {
     root = pos;
 }
 
-vector<int> TreeFile::getFreeNodes(int freeNode) {
-    vector<int> result;
+// ----------------------------------------------------------------
+stack<int> TreeFile::getFreeNodes(int freeNode) {
+    // Pre: classe inicializada e um inteiro correspondente a posicao
+    // do no apagado atual.
+    // Pos: retorna uma pilha com os nos livres em disco.
+    stack<int> result;
     int currFreeNode = freeNode;
 
     while(currFreeNode != 0) {
-        result.push_back(currFreeNode);
+        result.push(currFreeNode);
         currFreeNode = getNthNode(currFreeNode).A[1];
     }
     
@@ -236,14 +241,22 @@ void TreeFile::writeMetaInfo() {
     // Pre: classe inicializada.
     // Pos: salva as meta informacoes da arvore em memoria secundaria
     // (tamanho e posicao da raiz).
-    node p;
-    p.n = size;
-    p.A[0] = root;
+    node lastFreeNode;
+    node zero;
+    zero.n = size;
+    zero.A[0] = root;
     if(freeNodes.empty()) {
-        p.A[1] = 0;
+        zero.A[1] = 0;
     } else {
-        p.A[1] = freeNodes.front();
+        lastFreeNode.A[1] = freeNodes.top();
+        tree.seekp(freeNodes.top());
+        tree.write((const char *)(&lastFreeNode),sizeof(node));
+
+        for(int i = freeNodes.size(); i > 1; i--) {
+            freeNodes.pop();
+        }
+        zero.A[1] = freeNodes.top();
     }
     tree.seekp(0);
-    tree.write((const char *)(&p),sizeof(node));
+    tree.write((const char *)(&zero),sizeof(node));
 }
