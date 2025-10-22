@@ -88,9 +88,8 @@ void TreeFile::writeNode(node newNode) {
     // Pre: arquivo binario tree aberto e uma estrutura de no a ser
     // escrita em memoria secundaria.
     // Pos: Escreve a estrutura de registro em memoria secundaria.
-    size++;
     if(freeNodes.empty()){
-        tree.seekp(size * sizeof(node));
+        tree.seekp(++size * sizeof(node));
     } else {
         tree.seekp(freeNodes.top() * sizeof(node));
         freeNodes.pop();
@@ -122,7 +121,6 @@ void TreeFile::removeNode(int pos) {
         tree.write((const char*)(&emptyNode), sizeof(node));
     }
     freeNodes.push(pos);
-    size--;
 }
 
 // ----------------------------------------------------------------
@@ -132,7 +130,7 @@ void TreeFile::printNode(node node) {
     // Pos: imprime na tela o no dado com uma formatacao amigavel.
     cout << node.n << ","
          << right << setw(3) << node.A[0] << ",";
-    for (int j = 1; j <= node.n; j++) {
+    for (int j = 1; j <= node.n && j < m; j++) {
         cout << "(" 
              << setw(3) << node.K[j] << ", "
              << setw(3) << node.A[j] << ","
@@ -248,8 +246,8 @@ void TreeFile::writeMetaInfo() {
     if(freeNodes.empty()) {
         zero.A[1] = 0;
     } else {
-        lastFreeNode.A[1] = freeNodes.top();
-        tree.seekp(freeNodes.top());
+        lastFreeNode.A[1] = 0;
+        tree.seekp(freeNodes.top() * sizeof(node));
         tree.write((const char *)(&lastFreeNode),sizeof(node));
 
         for(int i = freeNodes.size(); i > 1; i--) {

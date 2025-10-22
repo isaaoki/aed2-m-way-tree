@@ -22,7 +22,8 @@ DataFile::DataFile(){
         registry r;
         data.seekp(0);
         data.read((char *)(&r), sizeof(registry));
-        size = r.satellites;
+        size = r.mass;
+        freeRegistries = getFreeRegistries(r.satellites);
         data.seekg(1 * sizeof(registry));
     }
 }
@@ -77,22 +78,29 @@ int DataFile::writeRegistry(registry newRegistry) {
     // a ser escrita em memoria secundaria.
     // Pos Escreve a estrutura de registro em memoria secundaria e
     // retorna o index onde a mesma foi escrita.
-    data.seekp(++size * sizeof(registry));
+    if(freeRegistries.empty()) {
+        data.seekp(++size * sizeof(registry));
+    } else {
+        data.seekp(freeRegistries.top() * sizeof(registry));
+        freeRegistries.pop();
+    }
     data.write((const char *)(&newRegistry), sizeof(registry));
     return size;
 }
 
 // ----------------------------------------------------------------
-int DataFile::removeRegistry(int pos) {
+void DataFile::removeRegistry(int pos) {
     // Pre: arquivo binario data aberto e a posicao do registro a
     // ser marcado como removido.
     // Pos: marca o registro como removido e decrementa o tamanho da 
     // arvore.
     registry emptyRegistry;
-    emptyRegistry.mass = 0;
-    data.seekp(pos * sizeof(registry));
-    data.write((const char*)(&emptyRegistry), sizeof(registry));
-    return --size;
+    emptyRegistry.satellites = pos;
+    if(!freeRegistries.empty()) {
+        data.seekp(freeRegistries.top() * sizeof(registry));
+        data.write((const char*)(&emptyRegistry), sizeof(registry));
+    }
+    freeRegistries.push(pos);
 }
 
 // ----------------------------------------------------------------
@@ -147,7 +155,7 @@ void DataFile::createFile() {
         abort();
     }
     registry r;
-    r.satellites = 0;
+    r.mass = 0;
     dataCreation.seekp(0);
     dataCreation.write((const char *)(&r),sizeof(registry));
     dataCreation.close();
@@ -159,12 +167,41 @@ void DataFile::createFile() {
 }
 
 // ----------------------------------------------------------------
+stack<int> DataFile::getFreeRegistries(int freeRegistry) {
+    // Pre: classe inicializada e um inteiro correspondente a posicao
+    // do registro apagado atual.
+    // Pos: retorna uma pilha com os registros livres em disco.
+    stack<int> result;
+    int currFreeRegistry = freeRegistry;
+
+    while(currFreeRegistry != 0) {
+        result.push(currFreeRegistry);
+        currFreeRegistry = getNthRegistry(currFreeRegistry).satellites;
+    }
+    
+    return result;
+}
+
+// ----------------------------------------------------------------
 void DataFile::writeMetaInfo() {
     // Pre: classe inicializada.
     // Pos: salva as meta informacoes do arquivo em memoria secundaria
     // (tamanho).
-    registry r;
-    r.satellites = size;
+    registry lastFreeRegistry;
+    registry zero;
+    zero.mass = size;
+    if(freeRegistries.empty()) {
+        zero.satellites = 0;
+    } else {
+        lastFreeRegistry.satellites = 0;
+        data.seekp(freeRegistries.top() * sizeof(registry));
+        data.write((const char *)(&lastFreeRegistry),sizeof(registry));
+
+        for(int i = freeRegistries.size(); i > 1; i--) {
+            freeRegistries.pop();
+        }
+        zero.satellites = freeRegistries.top();
+    }
     data.seekp(0);
-    data.write((const char *)(&r), sizeof(registry));
+    data.write((const char *)(&zero), sizeof(registry));
 }

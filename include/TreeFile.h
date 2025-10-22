@@ -1,6 +1,8 @@
 // TreeFile.h
 // Class to abstract the TreeFile manipulation
 
+#include <stack>
+
 #ifndef TREEFILE_H
 #define TREEFILE_H
 
@@ -34,6 +36,8 @@ class TreeFile {
         fstream tree;
         int size; // total de nos
         int root;
+        stack<int> freeNodes;
+        stack<int> getFreeNodes(int freeNode);
         void writeMetaInfo();
         void createTree();
 };

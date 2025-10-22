@@ -1,6 +1,8 @@
 // DataFile.h
 // Class to abstract the DataFile manipulation
 
+#include <stack>
+
 #ifndef DATAFILE_H
 #define DATAFILE_H
 
@@ -21,7 +23,7 @@ class DataFile {
         registry getNextRegistry();
         registry getNthRegistry(int n);
         int writeRegistry(registry newRegistry);
-        int removeRegistry(int pos);
+        void removeRegistry(int pos);
         static void printRegistry(registry registry);
         void printFile();
         int getSize();
@@ -29,8 +31,10 @@ class DataFile {
     private:
         fstream data;
         int size; // total de registros
-        void createFile();
+        stack<int> freeRegistries;
+        stack<int> getFreeRegistries(int freeRegistry);
         void writeMetaInfo();
+        void createFile();
 };
 
 #endif

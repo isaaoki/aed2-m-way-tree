@@ -21,6 +21,22 @@ void printMenu() {
     cout << "Choose an option: ";
 }
 
+stack<int> printStack(stack<int> s) {
+    stack<int> temp;
+    stack<int> result;
+    for(int i = s.size(); i > 0; i--) {
+        cout << s.top() << ",";
+        temp.push(s.top());
+        s.pop();
+    }
+    cout << endl;
+    for(int i = temp.size(); i > 0; i--) {
+        result.push(temp.top());
+        temp.pop();
+    }
+    return result;
+}
+
 int main() {
     TreeFile t;
     DataFile data;
@@ -41,6 +57,7 @@ int main() {
         switch (option) {
             case 1:
                 t.printTree();
+                data.removeRegistry(3);
                 break;
             case 2:
                 data.printFile();
