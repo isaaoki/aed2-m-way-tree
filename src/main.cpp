@@ -21,7 +21,7 @@ void printMenu() {
     cout << "Choose an option: ";
 }
 
-stack<int> printStack(stack<int> s) {
+stack<int> printStack(stack<int> s) { // Uso: stackASerImpressa = printStack(stackASerImpressa)
     stack<int> temp;
     stack<int> result;
     for(int i = s.size(); i > 0; i--) {
