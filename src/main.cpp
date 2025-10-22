@@ -57,7 +57,6 @@ int main() {
         switch (option) {
             case 1:
                 t.printTree();
-                data.removeRegistry(3);
                 break;
             case 2:
                 data.printFile();
