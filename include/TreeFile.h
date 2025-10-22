@@ -32,12 +32,12 @@ class TreeFile {
         int getIndexRoot();
         void setIndexRoot(int pos);
 
+        stack<int> getFreeNodes(int freeNode);
     private:
         fstream tree;
         int size; // total de nos
         int root;
         stack<int> freeNodes;
-        stack<int> getFreeNodes(int freeNode);
         void writeMetaInfo();
         void createTree();
 };

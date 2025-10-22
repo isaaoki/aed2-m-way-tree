@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <fstream>
 #include <cstdlib>
+#include <stack>
 using namespace std;
 
 #include "../include/TreeFile.h"
