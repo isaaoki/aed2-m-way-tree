@@ -232,59 +232,67 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
 // ----------------------------------------------------------------
 tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
     TreeFile::node nodeP, nodeQ, nodeR, nodeS;
+    // nodeP: nó atual contendo x (ou onde estava x)
+    // nodeQ: nó filho direito de Ki (sucessor)
+    // nodeR, nodeS: usados para fusão/redistribuição
     tuple<int, int> accessNumber;
-    int pos, index, write = 0;
-    int posQ, posR, indexR;
+    int posP, indexP, write = 0, read = 0;
+    int posQ, posR, indexR, j;
 
     mSearchResult searchResult = mSearch(treeFile, x);
+    read = searchResult.read;
 
     // x nao esta em T
     if (!searchResult.found) {
         cout << "Error: value doesnt exist." << endl;
-        accessNumber = make_tuple(searchResult.read, write);
+        accessNumber = make_tuple(read, write);
         return accessNumber;
     }    
 
     nodeP = get<0>(searchResult.visitedNodes.top());
-    pos = get<1>(searchResult.visitedNodes.top());
-    index = searchResult.i.top();
+    posP = get<1>(searchResult.visitedNodes.top());
+    indexP = searchResult.i.top();
     searchResult.visitedNodes.pop();
     searchResult.i.pop();
 
     // registro removido do datafile
-    dataFile->removeRegistry(nodeP.B[index]); 
+    dataFile->removeRegistry(nodeP.B[indexP]); 
     
     // nó é não-folha? 
     if (nodeP.A[0] != 0) {
-        // encontra chave para mover para folha
-        nodeQ = treeFile->getNthNode(nodeP.A[index]); // ir para subarvore direita
+        // encontra sucessor para mover
+        posQ = nodeP.A[indexP];
+        nodeQ = treeFile->getNthNode(posQ); 
+        read++;
 
-        while (nodeQ.A[0] != 0) { // q não é folha
-            // Adicionar leituras...
-            nodeQ = treeFile->getNthNode(nodeP.A[0]);
+        while (nodeQ.A[0] != 0) {
+            posQ = nodeQ.A[0];
+            nodeQ = treeFile->getNthNode(posQ);
+            read++;
         }
 
-        // Substituir Ki por Kqi e escrever no disco
-        nodeP.K[index] = nodeQ.K[1];
-        nodeP.B[index] = nodeQ.B[1];
-        treeFile->writeNode(nodeP, pos);
+        // substituir Ki por Kqi e escrever no disco
+        nodeP.K[indexP] = nodeQ.K[1];
+        nodeP.B[indexP] = nodeQ.B[1];
+        treeFile->writeNode(nodeP, posP);
         write++;
         
         nodeP = nodeQ;
-        index = 1;
+        posP = posQ;
+        indexP = 1;
     }
     
     // remover (Ki, Ai, Bi) de p
     nodeP.n--;
-    for (int i = index; i <= nodeP.n; i++) {
+    for (int i = indexP; i <= nodeP.n; i++) {
         nodeP.K[i] = nodeP.K[i + 1];
         nodeP.A[i] = nodeP.A[i + 1];
         nodeP.B[i] = nodeP.B[i + 1];
     }
 
-    cout << "NO P (CHAVE REMOVIDA):" << endl;
-    cout << "pos: " << pos << " index: " << index << endl;
-    cout << "N: " << nodeP.n << endl;
+    cout << "NO P (COM CHAVE REMOVIDA):" << endl;
+    cout << "posP: " << posP << " indexP: " << indexP << endl;
+    cout << "nP: " << nodeP.n << endl;
     cout << nodeP.A[0] << " ";
     for (int i = 1; i <= nodeP.n; i++) {
         cout << nodeP.K[i] << " " << nodeP.A[i] << " ";
@@ -292,7 +300,7 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
     cout << endl;
 
     // fragmentar nó (nao possui chaves suficientes e nao é raiz)
-    while (nodeP.n < (int)ceil(treeFile->getM()/2.0) - 1 && pos != treeFile->getIndexRoot()) {
+    while (nodeP.n < (int)ceil(treeFile->getM()/2.0) - 1 && posP != treeFile->getIndexRoot()) {
         // Pegar nó pai de p = nó R
         nodeR = get<0>(searchResult.visitedNodes.top());
         posR = get<1>(searchResult.visitedNodes.top());
@@ -300,9 +308,9 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
         searchResult.visitedNodes.pop();
         searchResult.i.pop();
 
-        cout << "PAI DO NO P - NO R:" << endl;
-        cout << "pos: " << posR << " index: " << indexR << endl;
-        cout << "N: " << nodeR.n << endl;
+        cout << "NO R (PAI DO NO P):" << endl;
+        cout << "posR: " << posR << " indexR: " << indexR << endl;
+        cout << "nR: " << nodeR.n << endl;
         cout << nodeR.A[0] << " ";
         for (int i = 1; i <= nodeR.n; i++) {
             cout << nodeR.K[i] << " " << nodeR.A[i] << " ";
@@ -311,22 +319,22 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
 
         // p tem irmao direito q mais proximo = nó Q
         if (indexR + 1 <= nodeR.n) {
-            // Adicionar leituras...
-            posQ = nodeR.A[indexR + 1];
+            j = indexR + 1;
+            posQ = nodeR.A[j];
             nodeQ = treeFile->getNthNode(posQ);
-            int j = indexR + 1;
+            read++;
 
-            cout << "IRMAO DO NO P - NO Q DIREITO:" << endl;
-            cout << "pos: " << posQ << " index: " << j << endl;
-            cout << "N: " << nodeQ.n << endl;
+            cout << "NO Q (IRMAO DIREITO DO NO P):" << endl;
+            cout << "posQ: " << posQ << endl;
+            cout << "nQ: " << nodeQ.n << endl;
             cout << nodeQ.A[0] << " ";
             for (int i = 1; i <= nodeQ.n; i++) {
                 cout << nodeQ.K[i] << " " << nodeQ.A[i] << " ";
             }
             cout << endl;   
 
+            // nó Q pode emprestar, redistribuir chaves
             if (nodeQ.n >= (int)ceil(treeFile->getM()/2.0)) { 
-                // nó Q pode emprestar, redistribuir chaves
                 nodeP.n++;
                 nodeP.K[nodeP.n] = nodeR.K[j];
                 nodeP.A[nodeP.n] = nodeQ.A[0];
@@ -343,34 +351,34 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
                     nodeQ.B[i] = nodeQ.B[i + 1];
                 }
 
-                cout << "EMPRESTIMO - NO P:" << endl;
-                cout << "pos: " << pos << " index: " << index << endl;
-                cout << "N: " << nodeP.n << endl;
+                cout << "NO P (EMPRESTIMO DO NO PAI E IRMAO DIREITO):" << endl;
+                cout << "posP: " << posP << " indexP: " << indexP << endl;
+                cout << "nP: " << nodeP.n << endl;
                 cout << nodeP.A[0] << " ";
                 for (int i = 1; i <= nodeP.n; i++) {
                     cout << nodeP.K[i] << " " << nodeP.A[i] << " ";
                 }
                 cout << endl;
 
-                cout << "EMPRESTIMO - NO R (pai):" << endl;
-                cout << "pos: " << posR << " index: " << indexR << endl;
-                cout << "N: " << nodeR.n << endl;
+                cout << "NO R (EMPRESTIMO DO NO PAI E IRMAO DIREITO):" << endl;
+                cout << "posR: " << posR << " indexR: " << indexR << endl;
+                cout << "nR: " << nodeR.n << endl;
                 cout << nodeR.A[0] << " ";
                 for (int i = 1; i <= nodeR.n; i++) {
                     cout << nodeR.K[i] << " " << nodeR.A[i] << " ";
                 }
                 cout << endl;
 
-                cout << "EMPRESTIMO - NO Q (irmao):" << endl;
-                cout << "pos: " << posQ << " index: " << j << endl;
-                cout << "N: " << nodeQ.n << endl;
+                cout << "NO Q (EMPRESTIMO DO NO PAI E IRMAO DIREITO):" << endl;
+                cout << "posQ: " << posQ << endl;
+                cout << "nQ: " << nodeQ.n << endl;
                 cout << nodeQ.A[0] << " ";
                 for (int i = 1; i <= nodeQ.n; i++) {
                     cout << nodeQ.K[i] << " " << nodeQ.A[i] << " ";
                 }
                 cout << endl;
 
-                treeFile->writeNode(nodeP, pos);
+                treeFile->writeNode(nodeP, posP);
                 treeFile->writeNode(nodeQ, posQ);
                 treeFile->writeNode(nodeR, posR);
                 write += 3;
@@ -378,15 +386,9 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
                 accessNumber = make_tuple(searchResult.read, write);
                 return accessNumber;
             }
-            // combinar p, Krj e y
+            // combinar p, Krj e q
+            nodeS = nodeP;
             nodeS.n = nodeP.n + nodeQ.n + 1;
-            nodeS.A[0] = nodeP.A[0];
-
-            for (int i = 1; i <= nodeP.n; i++) {
-                nodeS.K[i] = nodeP.K[i];
-                nodeS.A[i] = nodeP.A[i];
-                nodeS.B[i] = nodeP.B[i];
-            }
 
             nodeS.K[nodeP.n + 1] = nodeR.K[j];
             nodeS.A[nodeP.n + 1] = nodeQ.A[0];
@@ -398,17 +400,17 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
                 nodeS.B[i] = nodeQ.B[k];
             }
 
-            cout << "EMPRESTIMO - NO Q (irmao):" << endl;
-            cout << "N: " << nodeS.n << endl;
+            cout << "NO S (COMBINACAO):" << endl;
+            cout << "nS: " << nodeS.n << endl;
             cout << nodeS.A[0] << " ";
             for (int i = 1; i <= nodeS.n; i++) {
                 cout << nodeS.K[i] << " " << nodeS.A[i] << " ";
             }
             cout << endl;
 
-            treeFile->writeNode(nodeS, pos);
-            // treeFile->removeNode(posQ);
-            // write += 2;
+            treeFile->writeNode(nodeS, posP);
+            treeFile->removeNode(posQ);
+            write += 2;
 
             // retirar Krj de nó R
             nodeR.n--;
@@ -419,18 +421,18 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
             }
 
             nodeP = nodeR;
-            pos = posR; // conferir isso 
-            index = indexR;
+            posP = posR;
+            indexP = indexR;
         } 
         else { // nó P tem irmão mais próximo esquerdo = nó R (indexR - 1 >= 0)
-            // Adicionar leituras...
+            j = indexR;
             posQ = nodeR.A[indexR - 1];
             nodeQ = treeFile->getNthNode(posQ);
-            int j = indexR - 1;
+            read++;
 
-            cout << "IRMAO DO NO P - NO Q ESQUERDO:" << endl;
-            cout << "pos: " << posQ << " index: " << j << endl;
-            cout << "N: " << nodeQ.n << endl;
+            cout << "NO Q  (IRMAO ESQUERDO DO NO P):" << endl;
+            cout << "posQ: " << posQ << endl;
+            cout << "nQ: " << nodeQ.n << endl;
             cout << nodeQ.A[0] << " ";
             for (int i = 1; i <= nodeQ.n; i++) {
                 cout << nodeQ.K[i] << " " << nodeQ.A[i] << " ";
@@ -441,48 +443,42 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
                 // nó Q pode emprestar, redistribuir chaves
                 nodeP.n++;
                 nodeP.K[nodeP.n] = nodeR.K[j];
-                nodeP.A[nodeP.n] = nodeQ.A[0];
+                nodeP.A[nodeP.n] = nodeQ.A[nodeQ.n];
                 nodeP.B[nodeP.n] = nodeR.B[j];
 
-                nodeR.K[j] = nodeQ.K[1];
-                nodeR.B[j] = nodeQ.B[1]; // checar isso
+                nodeR.K[j] = nodeQ.K[nodeQ.n];
+                nodeR.B[j] = nodeQ.B[nodeQ.n];
 
                 nodeQ.n--;
-                nodeQ.A[0] = nodeQ.A[1];
-                for (int i = 1; i <= nodeQ.n; i++) {
-                    nodeQ.K[i] = nodeQ.K[i + 1];
-                    nodeQ.A[i] = nodeQ.A[i + 1];
-                    nodeQ.B[i] = nodeQ.B[i + 1];
-                }
 
-                cout << "EMPRESTIMO - NO P:" << endl;
-                cout << "pos: " << pos << " index: " << index << endl;
-                cout << "N: " << nodeP.n << endl;
+                cout << "NO P (EMPRESTIMO DO NO PAI E IRMAO ESQUERDO):" << endl;
+                cout << "posP: " << posP << " indexP: " << indexP << endl;
+                cout << "nP: " << nodeP.n << endl;
                 cout << nodeP.A[0] << " ";
                 for (int i = 1; i <= nodeP.n; i++) {
                     cout << nodeP.K[i] << " " << nodeP.A[i] << " ";
                 }
                 cout << endl;
 
-                cout << "EMPRESTIMO - NO R (pai):" << endl;
-                cout << "pos: " << posR << " index: " << indexR << endl;
-                cout << "N: " << nodeR.n << endl;
+                cout << "NO R (EMPRESTIMO DO NO PAI E IRMAO ESQUERDO):" << endl;
+                cout << "posR: " << posR << " indexR: " << indexR << endl;
+                cout << "nR: " << nodeR.n << endl;
                 cout << nodeR.A[0] << " ";
                 for (int i = 1; i <= nodeR.n; i++) {
                     cout << nodeR.K[i] << " " << nodeR.A[i] << " ";
                 }
                 cout << endl;
 
-                cout << "EMPRESTIMO - NO Q (irmao):" << endl;
-                cout << "pos: " << posQ << " index: " << j << endl;
-                cout << "N: " << nodeQ.n << endl;
+                cout << "NO Q (EMPRESTIMO DO NO PAI E IRMAO ESQUERDO):" << endl;
+                cout << "posQ: " << posQ << endl;
+                cout << "nQ: " << nodeQ.n << endl;
                 cout << nodeQ.A[0] << " ";
                 for (int i = 1; i <= nodeQ.n; i++) {
                     cout << nodeQ.K[i] << " " << nodeQ.A[i] << " ";
                 }
                 cout << endl;
 
-                treeFile->writeNode(nodeP, pos);
+                treeFile->writeNode(nodeP, posP);
                 treeFile->writeNode(nodeQ, posQ);
                 treeFile->writeNode(nodeR, posR);
                 write += 3;
@@ -491,18 +487,12 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
                 return accessNumber;
             }
             // combinar p, Krj e y
+            nodeS = nodeQ;
             nodeS.n = nodeP.n + nodeQ.n + 1;
-            nodeS.A[0] = nodeQ.A[0];
 
-            for (int i = 1; i <= nodeQ.n; i++) {
-                nodeS.K[i] = nodeQ.K[i];
-                nodeS.A[i] = nodeQ.A[i];
-                nodeS.B[i] = nodeQ.B[i];
-            }
-
-            nodeS.K[nodeQ.n + 1] = nodeR.K[1];
+            nodeS.K[nodeQ.n + 1] = nodeR.K[j];
             nodeS.A[nodeQ.n + 1] = nodeP.A[0];
-            nodeS.B[nodeQ.n + 1] = nodeR.B[1]; // checar valor de 1
+            nodeS.B[nodeQ.n + 1] = nodeR.B[j];
 
             for (int i = nodeQ.n + 2, k = 1; k <= nodeP.n; i++, k++) {
                 nodeS.K[i] = nodeP.K[k];
@@ -518,9 +508,9 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
             }
             cout << endl;
 
-            treeFile->writeNode(nodeS, pos);
-            // treeFile->removeNode(posQ);
-            // write += 2;
+            treeFile->writeNode(nodeS, posP);
+            treeFile->removeNode(posQ);
+            write += 2;
 
             // retirar Krj de nó R
             nodeR.n--;
@@ -531,19 +521,19 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) {
             }
 
             nodeP = nodeR;
-            pos = posR; // conferir isso 
-            index = indexR;
+            posP = posR;
+            indexP = indexR;
         }
     } 
 
    // escrita para disco
     if (nodeP.n != 0) {
-        treeFile->writeNode(nodeP, pos);
+        treeFile->writeNode(nodeP, posP);
         write++;
     } else {
-        treeFile->setIndexRoot(nodeP.A[0]); // checar isso???
+        treeFile->setIndexRoot(nodeP.A[0]);
     }
 
-    accessNumber = make_tuple(searchResult.read, write);
+    accessNumber = make_tuple(read, write);
     return accessNumber;
 }
