@@ -116,16 +116,12 @@ void TreeFile::removeNode(int pos) {
     // marcado como removido.
     // Pos: marca o no como removido e decrementa o tamanho da arvore.
     node emptyNode;
-    emptyNode.n = -1;
-    
-    if (!freeNodes.empty()) {
-        emptyNode.A[0] = freeNodes.top();
-    } else {
-        emptyNode.A[0] = -1;
+    emptyNode.A[1] = pos;
+    if(!freeNodes.empty()) {
+        tree.seekp(freeNodes.top() * sizeof(node));
+        tree.write((const char*)(&emptyNode), sizeof(node));
     }
 
-    tree.seekp(pos * sizeof(node));
-    tree.write((const char*)(&emptyNode), sizeof(node));
     freeNodes.push(pos);
 }
 
