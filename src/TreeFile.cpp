@@ -116,11 +116,16 @@ void TreeFile::removeNode(int pos) {
     // marcado como removido.
     // Pos: marca o no como removido e decrementa o tamanho da arvore.
     node emptyNode;
-    emptyNode.A[1] = pos;
-    if(!freeNodes.empty()) {
-        tree.seekp(freeNodes.top() * sizeof(node));
-        tree.write((const char*)(&emptyNode), sizeof(node));
+    emptyNode.n = -1;
+    
+    if (!freeNodes.empty()) {
+        emptyNode.A[0] = freeNodes.top();
+    } else {
+        emptyNode.A[0] = -1;
     }
+
+    tree.seekp(pos * sizeof(node));
+    tree.write((const char*)(&emptyNode), sizeof(node));
     freeNodes.push(pos);
 }
 
@@ -129,6 +134,10 @@ void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
     // Pos: imprime na tela o no dado com uma formatacao amigavel.
+    if (node.n == -1) {
+        cout << endl;
+        return;
+    }
     cout << node.n << ","
          << right << setw(3) << node.A[0] << ",";
     for (int j = 1; j <= node.n && j < m; j++) {
