@@ -152,6 +152,7 @@ void DataFile::printFile() {
 
     if(!freeRegistries.empty()) {
         registry.mass = -1;
+        registry.satellites = 0;
         writeRegistry(registry, freeRegistries.top());
     }
     data.seekg(1 * sizeof(registry));
@@ -160,7 +161,7 @@ void DataFile::printFile() {
         if(registry.mass != -1) {
             printRegistry(registry);
         } else {
-            cout << "-------- empty registry --------" << endl;
+            cout << string(48, '-') << "empty registry" << string(48, '-') << endl;
         }
     }
     data.seekg(1 * sizeof(registry));

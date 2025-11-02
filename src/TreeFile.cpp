@@ -157,7 +157,8 @@ void TreeFile::printTree() {
     cout << string(110, '-') << endl;
     
     if(!freeNodes.empty()) {
-        node.mass = -1;
+        node.n = -1;
+        node.A[1] = 0;
         writeNode(node, freeNodes.top());
     }
     tree.seekg(1 * sizeof(node));
@@ -167,7 +168,7 @@ void TreeFile::printTree() {
         if(node.n != -1) {
             printNode(node);
         } else {
-            cout << "-------- empty node --------" << endl;
+            cout << string(50, '-') << "empty node" << string(50, '-') << endl;
         }
     }
     tree.seekg(1 * sizeof(node));
