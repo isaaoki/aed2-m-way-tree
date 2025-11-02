@@ -116,6 +116,7 @@ void TreeFile::removeNode(int pos) {
     // marcado como removido.
     // Pos: marca o no como removido e decrementa o tamanho da arvore.
     node emptyNode;
+    emptyNode.n = -1;
     emptyNode.A[1] = pos;
     if(!freeNodes.empty()) {
         tree.seekp(freeNodes.top() * sizeof(node));
@@ -130,10 +131,6 @@ void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
     // Pos: imprime na tela o no dado com uma formatacao amigavel.
-    if (node.n == -1) {
-        cout << endl;
-        return;
-    }
     cout << node.n << ","
          << right << setw(3) << node.A[0] << ",";
     for (int j = 1; j <= node.n && j < m; j++) {
@@ -150,6 +147,7 @@ void TreeFile::printTree() {
     // Pre: arquivo binario tree aberto.
     // Pos: imprime na tela a arvore completa, inclusive sua raiz e
     // o valor de m com uma formatacao amigavel.
+    node node;
     cout << "B-TREE" << endl;
     cout << "T (root) = " << root << ", m = " << m << endl;
     cout << "Number of nodes = " << size << endl;
@@ -157,11 +155,20 @@ void TreeFile::printTree() {
     cout << left << setw(6) << "No" 
          << "n,A[0],(K[1],A[1],B[1]),...,(K[n],A[n], B[n])" << endl;
     cout << string(110, '-') << endl;
-
+    
+    if(!freeNodes.empty()) {
+        node.mass = -1;
+        writeNode(node, freeNodes.top());
+    }
     tree.seekg(1 * sizeof(node));
     for (int i = 1; i <= size; i++) {
         cout << left << setw(6) << i;
-        printNode(getNextNode());
+        node = getNthNode(i);
+        if(node.n != -1) {
+            printNode(node);
+        } else {
+            cout << "-------- empty node --------" << endl;
+        }
     }
     tree.seekg(1 * sizeof(node));
 

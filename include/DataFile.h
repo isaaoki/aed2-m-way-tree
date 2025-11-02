@@ -23,6 +23,7 @@ class DataFile {
         registry getNextRegistry();
         registry getNthRegistry(int n);
         int writeRegistry(registry newRegistry);
+        int writeRegistry(registry newRegistry, int pos);
         void removeRegistry(int pos);
         static void printRegistry(registry registry);
         void printFile();

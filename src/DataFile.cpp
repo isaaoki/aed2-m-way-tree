@@ -76,7 +76,7 @@ DataFile::registry DataFile::getNthRegistry(int n) {
 int DataFile::writeRegistry(registry newRegistry) { 
     // Pre: arquivo binario data aberto e uma estrutura de registro 
     // a ser escrita em memoria secundaria.
-    // Pos Escreve a estrutura de registro em memoria secundaria e
+    // Pos: Escreve a estrutura de registro em memoria secundaria e
     // retorna o index onde a mesma foi escrita.
     if(freeRegistries.empty()) {
         data.seekp(++size * sizeof(registry));
@@ -89,12 +89,25 @@ int DataFile::writeRegistry(registry newRegistry) {
 }
 
 // ----------------------------------------------------------------
+int DataFile::writeRegistry(registry newRegistry, int pos) { 
+    // Pre: arquivo binario data aberto, uma estrutura de registro 
+    // a ser escrita em memoria secundaria e o index da estrutura.
+    // Pos: Escreve a estrutura de registro em memoria secundaria 
+    // na posicao indicada e retorna o index onde a mesma foi escrita.
+    data.seekp(pos * sizeof(registry));
+    data.write((const char *)(&newRegistry), sizeof(registry));
+    if (pos > size) size = pos;
+    return size;
+}
+
+// ----------------------------------------------------------------
 void DataFile::removeRegistry(int pos) {
     // Pre: arquivo binario data aberto e a posicao do registro a
     // ser marcado como removido.
     // Pos: marca o registro como removido e decrementa o tamanho da 
     // arvore.
     registry emptyRegistry;
+    emptyRegistry.mass = -1;
     emptyRegistry.satellites = pos;
     if(!freeRegistries.empty()) {
         data.seekp(freeRegistries.top() * sizeof(registry));
@@ -122,6 +135,7 @@ void DataFile::printFile() {
     // Pre: arquivo binario data aberto.
     // Pos: imprime na tela o arquivo de dados completo, inclusive 
     // seu tamanho com uma formatacao amigavel.
+    registry registry;
     cout << "CELESTIAL BODIES" << endl;
     cout << "Number of registries = " << size << endl;
     cout << string(110, '-') << endl;
@@ -136,9 +150,18 @@ void DataFile::printFile() {
 
     cout << string(110, '-') << endl;
 
+    if(!freeRegistries.empty()) {
+        registry.mass = -1;
+        writeRegistry(registry, freeRegistries.top());
+    }
     data.seekg(1 * sizeof(registry));
     for (int i = 1; i <= size; i++) {
-        printRegistry(getNextRegistry());
+        registry = getNthRegistry(i);
+        if(registry.mass != -1) {
+            printRegistry(registry);
+        } else {
+            cout << "-------- empty registry --------" << endl;
+        }
     }
     data.seekg(1 * sizeof(registry));
 
