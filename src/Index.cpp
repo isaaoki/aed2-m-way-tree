@@ -586,3 +586,56 @@ tuple<int, int> Index::deleteB(int x) { // versao privada
     accessNumber = make_tuple(read, write);
     return accessNumber;
 }
+
+// ----------------------------------------------------------------
+void Index::bulkInsert() {
+    // Pre: existencia de um arquivo txt com os planetas a serem
+    // inseridos na seguinte formatacao:
+    /*
+        <massa> <nome> <raio> <distancia do sol> <nro de satelites> <e satelite?>
+        ...
+        <massa> <nome> <raio> <distancia do sol> <nro de satelites> <e satelite?>
+    */
+    // Pos: insere os corpos celestes contidos no arquivo txt nos
+    // arquivos binarios ultilizados pelo programa.
+    string fileName;
+    cout << "Entre com o nome do arquivo de texto a ser lido (default: planets.txt): ";
+    cin >> fileName;
+
+    // processo de abertura do arquivo de texto com o nome fornecido 
+    // pelo usuario em modo de leitura:
+    ifstream txtFile;
+    txtFile.open(string("../" + fileName), ios::in);
+    if (!txtFile.is_open()){
+        txtFile.open(string("../" + fileName + ".txt"), ios::in);
+        if (!txtFile.is_open()){
+            txtFile.open("../planets.txt", ios::in);
+            if (!txtFile.is_open()){
+                cout << "Erro: arquivo de texto nao pode ser aberto (provavel erro de armazenamento)." << endl;
+                abort();
+            } else {
+                cout << "Nome fornecido invalido ou arquivo não encontrado, lendo planets.txt..." << endl;
+            }
+        } else {
+            cout << "Lendo " << fileName << ".txt..." << endl;
+        }
+    } else {
+        cout << "Lendo " << fileName << "..." << endl;
+    }
+
+    // escrita no arquivo binario
+    DataFile::registry planet;
+    string isMoon;
+    while(! txtFile.eof()) {
+        txtFile >> planet.mass >> planet.name >> planet.radius >> planet.distanceFromSun >> planet.satellites;
+        txtFile >> isMoon;
+        if(isMoon == "t" || isMoon == "T" || isMoon == "true" || isMoon == "True") 
+            planet.isMoon = true;
+        else
+            planet.isMoon = false;
+        insertB(&planet);
+    }
+    txtFile.close();
+
+    cout << "Planetas adicionados com sucesso!" << endl;
+}

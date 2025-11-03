@@ -17,7 +17,8 @@ void printMenu() {
     cout << "3) Search celestial body by mass" << endl;
     cout << "4) Insert new celestial body" << endl;
     cout << "5) Remove celestial body by mass" << endl;
-    cout << "6) Exit" << endl;
+    cout << "6) Bulk insertion" << endl;
+    cout << "7) Exit" << endl;
     cout << "Choose an option: ";
 }
 
@@ -127,7 +128,11 @@ int main() {
                 cout << endl << "READ ACCESS: " << get<0>(access) << endl;
                 cout << "WRITE ACCESS: " << get<1>(access) << endl;
                 break;
-            case 6: 
+            case 6:
+                cout << "BULK INSERTION" << endl;
+                index.bulkInsert();
+                break;
+            case 7: 
                 isRunning = false;
                 break;
             default:

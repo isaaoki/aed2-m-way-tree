@@ -25,6 +25,7 @@ class Index {
         mSearchResult mSearch(int x);
         tuple<int, int> insertB(DataFile::registry* newRegistry);
         tuple<int, int> deleteB(int x);
+        void bulkInsert();
 
     private:
         TreeFile* treeFile;
