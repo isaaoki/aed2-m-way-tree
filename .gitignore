@@ -2,3 +2,6 @@
 .exe
 src/main
 .vscode
+files/data.bin
+files/mvias.bin
+src/main.exe

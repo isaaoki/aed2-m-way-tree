@@ -1,6 +1,8 @@
 // TreeFile.h
 // Class to abstract the TreeFile manipulation
 
+#include <stack>
+
 #ifndef TREEFILE_H
 #define TREEFILE_H
 
@@ -13,15 +15,17 @@ class TreeFile {
         struct node {
             int n;
             int A[m];
-            double K[m];
+            int K[m];
             int B[m];
         };
 
         node getTreeRoot();
         node getNextNode();
         node getNthNode(int n);
-        void writeNode(node newNode);
+        int writeNode(node newNode);
         void writeNode(node newNode, int pos);
+        void removeNode(int pos);
+        static void printStack(stack<int> s);
         static void printNode(node node);
         void printTree();
         int getM();
@@ -29,11 +33,12 @@ class TreeFile {
         int getIndexRoot();
         void setIndexRoot(int pos);
 
+        stack<int> getFreeNodes(int freeNode);
     private:
         fstream tree;
-        int nodeSize;
-        int size; // total de nos
+        int size; // numero de linhas no arquivo
         int root;
+        stack<int> freeNodes;
         void writeMetaInfo();
         void createTree();
 };

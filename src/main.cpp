@@ -16,8 +16,26 @@ void printMenu() {
     cout << "2) Print main file" << endl;
     cout << "3) Search celestial body by mass" << endl;
     cout << "4) Insert new celestial body" << endl;
-    cout << "5) Exit" << endl;
+    cout << "5) Remove celestial body by mass" << endl;
+    cout << "6) Bulk insertion" << endl;
+    cout << "7) Exit" << endl;
     cout << "Choose an option: ";
+}
+
+stack<int> printStack(stack<int> s) { // Uso: stackASerImpressa = printStack(stackASerImpressa)
+    stack<int> temp;
+    stack<int> result;
+    for(int i = s.size(); i > 0; i--) {
+        cout << s.top() << ",";
+        temp.push(s.top());
+        s.pop();
+    }
+    cout << endl;
+    for(int i = temp.size(); i > 0; i--) {
+        result.push(temp.top());
+        temp.pop();
+    }
+    return result;
 }
 
 int main() {
@@ -25,8 +43,9 @@ int main() {
     DataFile data;
     Index index(&t, &data);
     Index::mSearchResult searchResult;
-    bool isRunning = true;
     DataFile::registry r;
+    TreeFile::node node;
+    bool isRunning = true;
     int option, B;
     char moon;
     tuple<int, int> access;
@@ -48,6 +67,7 @@ int main() {
                 cout << "Enter mass (10^15 Kg): ";
                 cin >> r.mass;
                 searchResult = index.mSearch(r.mass);
+                node = get<0>(searchResult.visitedNodes.top());
                 
                 cout << endl << "mSearch result: ";
                 cout << setw(4) << r.mass << " ("
@@ -66,7 +86,7 @@ int main() {
                     << setw(12) << "Satellites"
                     << setw(9) << "isMoon?" << endl;
 
-                    data.printRegistry(data.getNthRegistry(searchResult.b));
+                    data.printRegistry(data.getNthRegistry(node.B[searchResult.i.top()]));
 
                     cout << string(110, '-') << endl;
                 } else {
@@ -99,6 +119,20 @@ int main() {
                 cout << "WRITE ACCESS: " << get<1>(access) << endl;
                 break;
             case 5: 
+                cout << "REMOVE CELESTIAL BODY BY MASS" << endl;
+                cout << "Enter mass (10^15 Kg): ";
+                cin >> r.mass;
+                
+                access = index.deleteB(r.mass);
+
+                cout << endl << "READ ACCESS: " << get<0>(access) << endl;
+                cout << "WRITE ACCESS: " << get<1>(access) << endl;
+                break;
+            case 6:
+                cout << "BULK INSERTION" << endl;
+                index.bulkInsert();
+                break;
+            case 7: 
                 isRunning = false;
                 break;
             default:
