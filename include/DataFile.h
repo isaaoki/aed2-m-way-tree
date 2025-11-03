@@ -25,6 +25,7 @@ class DataFile {
         int writeRegistry(registry newRegistry);
         int writeRegistry(registry newRegistry, int pos);
         void removeRegistry(int pos);
+        static void printStack(stack<int> s);
         static void printRegistry(registry registry);
         void printFile();
         int getSize();
