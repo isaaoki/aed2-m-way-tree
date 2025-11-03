@@ -312,10 +312,9 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
         // Escrever p e q para disco
         K = tempK[half];
         B = tempB[half];
-        A = treeFile->getSize() + 1;
-
         treeFile->writeNode(nodeP, pos);
-        treeFile->writeNode(nodeQ);
+        A = treeFile->writeNode(nodeQ);
+        
         write += 2;
     }
 
@@ -328,8 +327,8 @@ tuple<int, int> Index::insertB(DataFile::registry* newRegistry, TreeFile* treeFi
     nodeRoot.B[1] = B;
 
     // Atualizar raiz e escrever raiz no disco
-    treeFile->writeNode(nodeRoot);
-    treeFile->setIndexRoot(treeFile->getSize());
+    int posRoot = treeFile->writeNode(nodeRoot);
+    treeFile->setIndexRoot(posRoot);
     write++;
     accessNumber = make_tuple(searchResult.read, write);
     return accessNumber;

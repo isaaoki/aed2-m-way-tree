@@ -78,14 +78,17 @@ int DataFile::writeRegistry(registry newRegistry) {
     // a ser escrita em memoria secundaria.
     // Pos: Escreve a estrutura de registro em memoria secundaria e
     // retorna o index onde a mesma foi escrita.
+    int pos;
     if(freeRegistries.empty()) {
-        data.seekp(++size * sizeof(registry));
+        pos = ++size;
+        data.seekp(pos * sizeof(registry));
     } else {
+        pos = freeRegistries.top();
         data.seekp(freeRegistries.top() * sizeof(registry));
         freeRegistries.pop();
     }
     data.write((const char *)(&newRegistry), sizeof(registry));
-    return size;
+    return pos;
 }
 
 // ----------------------------------------------------------------
@@ -122,7 +125,7 @@ void DataFile::printStack(stack<int> s) {
     // e um metodo estatico.
     // Pos: imprime na tela a pilha com uma formatação amigavel.
     stack<int> temp = s;
-    cout << "Registros livres: ";
+    cout << "Stack of free registries: ";
     for(int i = s.size(); i > 1; i--) {
         cout << temp.top() << ", ";
         temp.pop();

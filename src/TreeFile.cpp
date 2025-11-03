@@ -85,17 +85,21 @@ TreeFile::node TreeFile::getNthNode(int n) {
 }
 
 // ----------------------------------------------------------------
-void TreeFile::writeNode(node newNode) { 
+int TreeFile::writeNode(node newNode) { 
     // Pre: arquivo binario tree aberto e uma estrutura de no a ser
     // escrita em memoria secundaria.
     // Pos: Escreve a estrutura de registro em memoria secundaria.
+    int pos;
     if(freeNodes.empty()){
-        tree.seekp(++size * sizeof(node));
+        pos = ++size;
+        tree.seekp(pos * sizeof(node));
     } else {
-        tree.seekp(freeNodes.top() * sizeof(node));
+        pos = freeNodes.top();
+        tree.seekp(pos * sizeof(node));
         freeNodes.pop();
     }
     tree.write((const char *)(&newNode), sizeof(node));
+    return pos;
 }
 
 // ----------------------------------------------------------------
@@ -132,7 +136,7 @@ void TreeFile::printStack(stack<int> s) {
     // e um metodo estatico.
     // Pos: imprime na tela a pilha com uma formatação amigavel.
     stack<int> temp = s;
-    cout << "Nos livres: ";
+    cout << "Stack of free nodes: ";
     for(int i = s.size(); i > 1; i--) {
         cout << temp.top() << ", ";
         temp.pop();
@@ -230,8 +234,8 @@ void TreeFile::createTree() {
 // ----------------------------------------------------------------
 int TreeFile::getSize() {
     // Pre: classe inicializada.
-    // Pos: retorna o valor correspondente ao tamanho em nos
-    // da arvore de m-vias.
+    // Pos: retorna o valor correspondente ao numero de linhas
+    // do arquivo da arvore de m-vias.
     return size;
 }
 
