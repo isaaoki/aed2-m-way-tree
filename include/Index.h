@@ -32,12 +32,11 @@ class Index {
         DataFile* dataFile;
         
         int linearSearch(vector<int> &K, int x, int n);
-        mSearchResult mSearch(TreeFile* treeFile, int x);
-        tuple<int, int> insertB(DataFile::registry* newRegistry, TreeFile* treeFile, DataFile* dataFile);
         void shiftLeft(TreeFile::node &node, int start);
         void replaceWithSuccessor(TreeFile::node &nodeP, int &indexP, int &posP, int &read, int &write, mSearchResult &searchResult);
         void redistributeRight(TreeFile::node &nodeP, TreeFile::node &nodeR, TreeFile::node &nodeQ, int j, int posP, int posR, int posQ, int &write);
         void redistributeLeft(TreeFile::node &nodeP, TreeFile::node &nodeR, TreeFile::node &nodeQ, int j, int posP, int posR, int posQ, int &write);
+        void mergeNodes(TreeFile::node &nodeLeft, TreeFile::node &nodeParent, TreeFile::node &nodeRight, int j, int posLeft, int posRight, int &write);
 };
 
 #endif
