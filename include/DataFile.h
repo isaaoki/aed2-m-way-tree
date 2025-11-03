@@ -28,11 +28,10 @@ class DataFile {
         static void printStack(stack<int> s);
         static void printRegistry(registry registry);
         void printFile();
-        int getSize();
 
     private:
         fstream data;
-        int size; // total de registros
+        int size; // numero de linhas no arquivo 
         stack<int> freeRegistries;
         stack<int> getFreeRegistries(int freeRegistry);
         void writeMetaInfo();

@@ -22,7 +22,7 @@ class TreeFile {
         node getTreeRoot();
         node getNextNode();
         node getNthNode(int n);
-        void writeNode(node newNode);
+        int writeNode(node newNode);
         void writeNode(node newNode, int pos);
         void removeNode(int pos);
         static void printStack(stack<int> s);
@@ -36,7 +36,7 @@ class TreeFile {
         stack<int> getFreeNodes(int freeNode);
     private:
         fstream tree;
-        int size; // total de nos
+        int size; // numero de linhas no arquivo
         int root;
         stack<int> freeNodes;
         void writeMetaInfo();
