@@ -134,12 +134,10 @@ void TreeFile::printStack(stack<int> s) {
     stack<int> temp = s;
     cout << "Nos livres: ";
     for(int i = s.size(); i > 1; i--) {
-        cout << s.top() << ", ";
-        temp.push(s.top());
-        s.pop();
+        cout << temp.top() << ", ";
+        temp.pop();
     }
-    cout << s.top() << "." << endl;
-    s.pop();
+    cout << temp.top() << "." << endl;
     cout << endl;
 }
 
