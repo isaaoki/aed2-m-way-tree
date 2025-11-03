@@ -62,7 +62,7 @@ void Index::replaceWithSuccessor(TreeFile::node &nodeP, int &indexP, int &posP, 
 
     vector<tuple<TreeFile::node,int>> pathNodes;
 
-    // acrescenta nó na pilha de nós visitados
+    // acrescenta nó na vetor de nós visitados
     pathNodes.push_back(make_tuple(nodeQ, posQ));
 
     while (nodeQ.A[0] != 0) {
