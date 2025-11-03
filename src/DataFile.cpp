@@ -117,6 +117,23 @@ void DataFile::removeRegistry(int pos) {
 }
 
 // ----------------------------------------------------------------
+void DataFile::printStack(stack<int> s) {
+    // Pre: uma pilha de inteiros. Nao precisa do arquivo aberto e
+    // e um metodo estatico.
+    // Pos: imprime na tela a pilha com uma formatação amigavel.
+    stack<int> temp = s;
+    cout << "Registros livres: ";
+    for(int i = s.size(); i > 1; i--) {
+        cout << s.top() << ", ";
+        temp.push(s.top());
+        s.pop();
+    }
+    cout << s.top() << "." << endl;
+    s.pop();
+    cout << endl;
+}
+
+// ----------------------------------------------------------------
 void DataFile::printRegistry(registry registry) {
     // Pre: uma estrutura de registro a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
@@ -137,7 +154,7 @@ void DataFile::printFile() {
     // seu tamanho com uma formatacao amigavel.
     registry registry;
     cout << "CELESTIAL BODIES" << endl;
-    cout << "Number of registries = " << size << endl;
+    cout << "Number of Celestial Bodies = " << size - freeRegistries.size() << ", Number of lines on the file = " << size << endl;
     cout << string(110, '-') << endl;
 
     cout << left 
@@ -157,7 +174,7 @@ void DataFile::printFile() {
     }
     data.seekg(1 * sizeof(registry));
     for (int i = 1; i <= size; i++) {
-        registry = getNthRegistry(i);
+        registry = getNextRegistry();
         if(registry.mass != -1) {
             printRegistry(registry);
         } else {
@@ -167,6 +184,8 @@ void DataFile::printFile() {
     data.seekg(1 * sizeof(registry));
 
     cout << string(110, '-') << endl;
+    if(!freeRegistries.empty())
+        printStack(freeRegistries);
 }
 
 // ----------------------------------------------------------------

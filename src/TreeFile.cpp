@@ -127,6 +127,23 @@ void TreeFile::removeNode(int pos) {
 }
 
 // ----------------------------------------------------------------
+void TreeFile::printStack(stack<int> s) {
+    // Pre: uma pilha de inteiros. Nao precisa do arquivo aberto e
+    // e um metodo estatico.
+    // Pos: imprime na tela a pilha com uma formatação amigavel.
+    stack<int> temp = s;
+    cout << "Nos livres: ";
+    for(int i = s.size(); i > 1; i--) {
+        cout << s.top() << ", ";
+        temp.push(s.top());
+        s.pop();
+    }
+    cout << s.top() << "." << endl;
+    s.pop();
+    cout << endl;
+}
+
+// ----------------------------------------------------------------
 void TreeFile::printNode(node node) {
     // Pre: uma estrutura de no a ser impressa. Nao precisa do 
     // arquivo aberto e e um metodo estatico.
@@ -150,7 +167,7 @@ void TreeFile::printTree() {
     node node;
     cout << "B-TREE" << endl;
     cout << "T (root) = " << root << ", m = " << m << endl;
-    cout << "Number of nodes = " << size << endl;
+    cout << "Number of nodes = " << size - freeNodes.size() << ", Number of lines on the file = " << size << endl;
     cout << string(110, '-') << endl;
     cout << left << setw(6) << "No" 
          << "n,A[0],(K[1],A[1],B[1]),...,(K[n],A[n], B[n])" << endl;
@@ -164,7 +181,7 @@ void TreeFile::printTree() {
     tree.seekg(1 * sizeof(node));
     for (int i = 1; i <= size; i++) {
         cout << left << setw(6) << i;
-        node = getNthNode(i);
+        node = getNextNode();
         if(node.n != -1) {
             printNode(node);
         } else {
@@ -174,6 +191,8 @@ void TreeFile::printTree() {
     tree.seekg(1 * sizeof(node));
 
     cout << string(110, '-') << endl;
+    if(!freeNodes.empty())
+        printStack(freeNodes);
 }
 
 // ----------------------------------------------------------------
