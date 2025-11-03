@@ -65,12 +65,11 @@ int Index::linearSearch(vector<int> &K, int x, int n) {
 void Index::shiftLeft(TreeFile::node &node, int start) {
     // Pre: um no e um index de start.
     // Pos: retorna o no com os valores deslocados uma unidade para a esquerda.
-    for (int i = start; i < node.n; i++) {
+    for (int i = start; i <= node.n; i++) {
         node.K[i] = node.K[i + 1];
         node.A[i] = node.A[i + 1];
         node.B[i] = node.B[i + 1];
     }
-    node.n--;
 }
 
 // ----------------------------------------------------------------
@@ -116,6 +115,7 @@ void Index::redistributeRight(TreeFile *treeFile, TreeFile::node &nodeP, TreeFil
     nodeR.B[j] = nodeQ.B[1];
 
     // Ajusta no Q
+    nodeQ.n--;
     nodeQ.A[0] = nodeQ.A[1];
     shiftLeft(nodeQ, 1);
 
@@ -130,11 +130,19 @@ void Index::redistributeLeft(TreeFile *treeFile, TreeFile::node &nodeP, TreeFile
     // Pre: no P tem irmao esquerdo no Q e no Q pode emprestar chave.
     // Pos: redistribui as chaves, movendo chave do pai para P, e a maior chave de Q para pai.
 
+    // Desloca P para direita para abrir espaço no início
+    for (int i = nodeP.n; i >= 1; i--) {
+        nodeP.K[i + 1] = nodeP.K[i];
+        nodeP.A[i + 1] = nodeP.A[i];
+        nodeP.B[i + 1] = nodeP.B[i];
+    }
+    nodeP.A[1] = nodeP.A[0];
+
     // Adiciona chave do pai a no P
     nodeP.n++;
-    nodeP.K[nodeP.n] = nodeR.K[j];
-    nodeP.A[nodeP.n] = nodeQ.A[nodeQ.n];
-    nodeP.B[nodeP.n] = nodeR.B[j];
+    nodeP.K[1] = nodeR.K[j];
+    nodeP.A[0] = nodeQ.A[nodeQ.n];
+    nodeP.B[1] = nodeR.B[j];
 
     // Move maior chave de Q para pai
     nodeR.K[j] = nodeQ.K[nodeQ.n];
@@ -356,7 +364,11 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) { 
         replaceWithSuccessor(treeFile, nodeP, indexP, posP, read, write);
     }
     
-    shiftLeft(nodeP, indexP); // remover (Ki, Ai, Bi) de p
+    // Remover (Ki, Ai, Bi) de p
+    if (indexP <= nodeP.n) {
+        nodeP.n--;
+        shiftLeft(nodeP, indexP);
+    }
 
     cout << "NO P (COM CHAVE REMOVIDA):" << endl;
     cout << "posP: " << posP << " indexP: " << indexP << endl;
@@ -369,6 +381,8 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) { 
 
     // fragmentar nó (nao possui chaves suficientes e nao é raiz)
     while (nodeP.n < (int)ceil(treeFile->getM()/2.0) - 1 && posP != treeFile->getIndexRoot()) {
+        if (searchResult.visitedNodes.empty() || searchResult.i.empty()) break;
+
         // Pegar nó pai de p = nó R
         nodeR = get<0>(searchResult.visitedNodes.top());
         posR = get<1>(searchResult.visitedNodes.top());
@@ -462,17 +476,14 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) { 
 
             // retirar Krj de nó R
             nodeR.n--;
-            for (int i = j; i <= nodeR.n; i++) {
-                nodeR.K[i] = nodeR.K[i + 1];
-                nodeR.A[i] = nodeR.A[i + 1];
-                nodeR.B[i] = nodeR.B[i + 1];
-            }
+            shiftLeft(nodeR, j);
 
             nodeP = nodeR;
             posP = posR;
             indexP = indexR;
         } 
         else { // nó P tem irmão mais próximo esquerdo = nó R (indexR - 1 >= 0)
+            if (indexR - 1 < 0) break;
             j = indexR;
             posQ = nodeR.A[indexR - 1];
             nodeQ = treeFile->getNthNode(posQ);
@@ -549,11 +560,7 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) { 
 
             // retirar Krj de nó R
             nodeR.n--;
-            for (int i = j; i <= nodeR.n; i++) {
-                nodeR.K[i] = nodeR.K[i + 1];
-                nodeR.A[i] = nodeR.A[i + 1];
-                nodeR.B[i] = nodeR.B[i + 1];
-            }
+            shiftLeft(nodeR, j);
 
             nodeP = nodeR;
             posP = posR;
@@ -566,7 +573,8 @@ tuple<int, int> Index::deleteB(TreeFile* treeFile, DataFile* dataFile, int x) { 
         treeFile->writeNode(nodeP, posP);
         write++;
     } else {
-        treeFile->setIndexRoot(nodeP.A[0]);
+        if (nodeP.A[0] != 0) treeFile->setIndexRoot(nodeP.A[0]);
+        else treeFile->setIndexRoot(0);
         treeFile->removeNode(posP);
         write++;
     }
