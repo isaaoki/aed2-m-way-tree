@@ -61,11 +61,9 @@ void Index::replaceWithSuccessor(TreeFile::node &nodeP, int &indexP, int &posP, 
     read++;
 
     vector<tuple<TreeFile::node,int>> pathNodes;
+    pathNodes.push_back(make_tuple(nodeQ, posQ)); // acrescenta ne no vetor de nes visitados
 
-    // acrescenta nó na vetor de nós visitados
-    pathNodes.push_back(make_tuple(nodeQ, posQ));
-
-    while (nodeQ.A[0] != 0) {
+    while (nodeQ.A[0] != 0) { // encontra sucessor
         posQ = nodeQ.A[0];
         nodeQ = treeFile->getNthNode(posQ);
         read++;
@@ -80,9 +78,10 @@ void Index::replaceWithSuccessor(TreeFile::node &nodeP, int &indexP, int &posP, 
 
     searchResult.visitedNodes.push(make_tuple(nodeP, posP));
     searchResult.i.push(indexP);
-    for (auto &p : pathNodes) {
-        searchResult.visitedNodes.push(p);
-        searchResult.i.push(1);
+    for (int i = 0; i < pathNodes.size(); i++) {
+        searchResult.visitedNodes.push(pathNodes[i]);
+        searchResult.i.push(0);
+
     }
     searchResult.visitedNodes.pop();
     searchResult.i.pop(); 
@@ -163,12 +162,11 @@ void Index::mergeNodes(TreeFile::node &nodeLeft, TreeFile::node &nodeParent, Tre
     aux.A[nodeLeft.n + 1] = nodeRight.A[0];
     aux.B[nodeLeft.n + 1] = nodeParent.B[j];
 
-    for (int i = nodeLeft.n + 2, k = 1; k <= nodeRight.n; i++, k++) {
-        aux.K[i] = nodeRight.K[k];
-        aux.A[i] = nodeRight.A[k];
-        aux.B[i] = nodeRight.B[k];
+    for (int k = 1; k <= nodeRight.n; k++) {
+        aux.K[nodeLeft.n + 1 + k] = nodeRight.K[k];
+        aux.A[nodeLeft.n + 1 + k] = nodeRight.A[k];
+        aux.B[nodeLeft.n + 1 + k] = nodeRight.B[k];
     }
-
     treeFile->writeNode(aux, posLeft);
     treeFile->removeNode(posRight);
     write += 2;
@@ -176,6 +174,7 @@ void Index::mergeNodes(TreeFile::node &nodeLeft, TreeFile::node &nodeParent, Tre
     // Retira chave j do no pai
     nodeParent.n--;
     shiftLeft(nodeParent, j);
+    nodeParent.A[j] = posLeft; // atualiza referencia
 }
 
 // ----------------------------------------------------------------
@@ -378,12 +377,12 @@ tuple<int, int> Index::deleteB(int x) {
 
     // registro removido do datafile
     dataFile->removeRegistry(nodeP.B[indexP]); 
-    
+
     // nó é não-folha? 
     if (nodeP.A[0] != 0) {
         replaceWithSuccessor(nodeP, indexP, posP, read, write, searchResult);
     }
-        
+
     // Remover (Ki, Ai, Bi) de p
     nodeP.n--;
     shiftLeft(nodeP, indexP);
@@ -423,7 +422,7 @@ tuple<int, int> Index::deleteB(int x) {
             read++;
 
             // nó Q pode emprestar, redistribuir chave
-            if (nodeQ.n >= (int)ceil(treeFile->getM()/2.0)) { 
+            if (nodeQ.n >= (int)ceil(treeFile->getM()/2.0)) {
                 redistributeLeft(nodeP, nodeR, nodeQ, j, posP, posR, posQ, write);
                 accessNumber = make_tuple(searchResult.read, write);
                 return accessNumber;
@@ -478,7 +477,7 @@ void Index::bulkInsert() {
                 cout << "Erro: arquivo de texto nao pode ser aberto (provavel erro de armazenamento)." << endl;
                 abort();
             } else {
-                cout << "Nome fornecido invalido ou arquivo não encontrado, lendo planets.txt..." << endl;
+                cout << "Nome fornecido invalido ou arquivo nao encontrado, lendo planets.txt..." << endl;
             }
         } else {
             cout << "Lendo " << fileName << ".txt..." << endl;
