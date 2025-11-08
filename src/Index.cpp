@@ -171,7 +171,7 @@ void Index::mergeNodes(TreeFile::node &nodeLeft, TreeFile::node &nodeParent, Tre
     // Retira chave j do no pai
     nodeParent.n--;
     shiftLeft(nodeParent, j);
-    if (j != 1) nodeParent.A[j] = posLeft; // atualiza referencia
+    nodeParent.A[j-1] = posLeft;
 
     treeFile->writeNode(nodeParent, posParent); // escreve mais uma vez
     write++;
