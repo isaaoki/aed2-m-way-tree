@@ -404,7 +404,7 @@ tuple<int, int> Index::deleteB(int x) {
             read++; 
 
             // nó Q pode emprestar, redistribuir chaves
-            if (nodeQ.n > (int)ceil(treeFile->getM()/2.0)) { 
+            if (nodeQ.n >= (int)ceil(treeFile->getM()/2.0)) { 
                 redistributeRight(nodeP, nodeR, nodeQ, j, posP, posR, posQ, write);
                 accessNumber = make_tuple(searchResult.read, write);
                 return accessNumber;
@@ -422,7 +422,7 @@ tuple<int, int> Index::deleteB(int x) {
             read++;
 
             // nó Q pode emprestar, redistribuir chave
-            if (nodeQ.n > (int)ceil(treeFile->getM()/2.0)) {
+            if (nodeQ.n >= (int)ceil(treeFile->getM()/2.0)) {
                 redistributeLeft(nodeP, nodeR, nodeQ, j, posP, posR, posQ, write);
                 accessNumber = make_tuple(searchResult.read, write);
                 return accessNumber;
